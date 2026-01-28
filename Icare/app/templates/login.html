@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthPredict | Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Custom animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .animate-pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        .animate-shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        /* Glass morphism effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 10px;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border-left-color: #3b82f6;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6, #06b6d4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        /* Form focus styles */
+        .form-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+    </style>
+</head>
+<body class="text-slate-900">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 glass-card border-b border-slate-200/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-teal-500 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    </div>
+                    <a href="{% url 'home' %}" class="text-2xl font-bold gradient-text">HealthPredict</a>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="{% url 'home' %}" class="text-slate-600 hover:text-blue-600 transition duration-300 hover:scale-105">Home</a>
+                    <a href="#features" class="text-slate-600 hover:text-blue-600 transition duration-300 hover:scale-105">Features</a>
+                    <a href="#demo" class="text-slate-600 hover:text-blue-600 transition duration-300 hover:scale-105">Demo</a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="{% url 'login' %}" class="text-blue-600 font-medium hover:text-blue-700 transition duration-300">Login</a>
+                    <a href="{% url 'signup' %}" class="bg-gradient-to-r from-blue-600 to-teal-500 text-white px-6 py-3 rounded-full font-medium hover:shadow-lg hover:shadow-blue-200 transition duration-300 transform hover:-translate-y-1">Get Started</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex items-center justify-center p-4">
+        <!-- Background with gradient and abstract shapes -->
+        <div class="fixed inset-0 z-0 pointer-events-none">
+            <div class="absolute top-0 left-0 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-float"></div>
+            <div class="absolute bottom-0 right-0 w-72 h-72 bg-teal-300 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-float" style="animation-delay: 1.5s"></div>
+            <div class="absolute top-1/2 left-1/3 w-64 h-64 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-float" style="animation-delay: 3s"></div>
+        </div>
+        
+        <div class="w-full max-w-6xl mx-auto z-10 flex justify-center">
+            <div class="w-full max-w-md">
+                <!-- Authentication Forms -->
+                <div class="animate-fade-in-up" style="animation-delay: 0.2s">
+                    <!-- Form Container -->
+                    <div class="glass-card rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+                        <!-- Tab Selector -->
+                        <div class="flex border-b border-slate-200">
+                            <div class="w-full py-4 text-center font-bold text-lg text-white bg-gradient-to-r from-blue-600 to-teal-500">
+                                <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+                            </div>
+                        </div>
+                        
+                        <!-- Forms -->
+                        <div class="p-8">
+                            <!-- Login Form -->
+                            <form id="loginForm" method="POST" action="{% url 'login' %}" class="space-y-6">
+                                {% csrf_token %}
+                                
+                                <!-- Error Message Display -->
+                                {% if error %}
+                                <div id="errorAlert" class="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 animate-shake">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-red-100 text-red-600 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-bold">Login Failed</div>
+                                            <div class="text-sm">{{ error }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                <div>
+                                    <label class="block text-slate-700 mb-2 font-medium">Email Address</label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-envelope text-slate-400"></i>
+                                        </div>
+                                        <input type="email" name="email" id="loginEmail" class="form-input w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" placeholder="you@example.com" required>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-slate-700 mb-2 font-medium">Password</label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-lock text-slate-400"></i>
+                                        </div>
+                                        <input type="password" name="password" id="loginPassword" class="form-input w-full pl-10 pr-12 py-3 border border-slate-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" placeholder="••••••••" required>
+                                        <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center toggle-password" data-target="loginPassword">
+                                            <i class="fas fa-eye text-slate-400 hover:text-blue-500"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="remember" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
+                                        <span class="ml-2 text-sm text-slate-600">Remember me</span>
+                                    </label>
+                                    <a href="#" class="text-sm text-blue-600 hover:text-blue-800 font-medium">Forgot password?</a>
+                                </div>
+                                
+                                <div class="pt-2">
+                                    <button type="submit" id="loginButton" class="w-full py-4 bg-gradient-to-r from-blue-600 to-teal-500 text-white font-bold rounded-xl hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                                        <span id="loginButtonText">Sign In</span>
+                                        <div id="loginSpinner" class="hidden spinner mx-auto mt-2 border-2 border-white/30 border-t-white w-6 h-6"></div>
+                                    </button>
+                                </div>
+                                
+                                <div class="text-center text-sm text-slate-600">
+                                    Don't have an account? 
+                                    <a href="{% url 'signup' %}" class="text-blue-600 font-medium hover:text-blue-800 ml-1">
+                                        Create one now
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Security Badges -->
+                    <div class="flex flex-wrap justify-center gap-6 mt-8">
+                        <div class="flex items-center gap-2 text-slate-600">
+                            <i class="fas fa-shield-alt text-green-500"></i>
+                            <span class="text-sm font-medium">HIPAA Compliant</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-slate-600">
+                            <i class="fas fa-lock text-blue-500"></i>
+                            <span class="text-sm font-medium">End-to-End Encryption</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-slate-600">
+                            <i class="fas fa-user-shield text-purple-500"></i>
+                            <span class="text-sm font-medium">GDPR Ready</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-12 mt-auto">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-8">
+                <div class="flex items-center justify-center gap-2 mb-4">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-600 to-teal-500 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    </div>
+                    <span class="text-xl font-bold text-white">HealthPredict</span>
+                </div>
+                <p class="max-w-2xl mx-auto">Transforming healthcare through AI-powered predictive analytics. Secure, accurate, and designed for medical professionals.</p>
+            </div>
+            
+            <div class="pt-8 border-t border-slate-800 text-center">
+                <p>&copy; 2025 HealthPredict AI System. All rights reserved. HIPAA Compliant • SOC 2 Certified</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Toggle password visibility
+        const toggleButtons = document.querySelectorAll('.toggle-password');
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                const icon = this.querySelector('i');
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+        
+        // Form submission handlers
+        const loginForm = document.getElementById('loginForm');
+        const loginButton = document.getElementById('loginButton');
+        const loginButtonText = document.getElementById('loginButtonText');
+        const loginSpinner = document.getElementById('loginSpinner');
+        
+        if (loginForm) {
+            loginForm.addEventListener('submit', function(e) {
+                // Show loading state
+                loginButtonText.classList.add('hidden');
+                loginSpinner.classList.remove('hidden');
+                loginButton.disabled = true;
+                
+                // Allow form to submit after a brief delay to show loading
+                setTimeout(() => {
+                    loginForm.submit();
+                }, 500);
+            });
+        }
+        
+        // Add some interactivity to form inputs
+        const formInputs = document.querySelectorAll('.form-input');
+        formInputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('ring-2', 'ring-blue-200');
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('ring-2', 'ring-blue-200');
+            });
+        });
+        
+        // Initialize animations
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.animate-fade-in-up').forEach((el, index) => {
+                el.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
+</body>
+</html>

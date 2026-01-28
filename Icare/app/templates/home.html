@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthPredict | AI-Powered Healthcare Analytics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%);
+            overflow-x: hidden;
+        }
+        
+        /* Enhanced animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            33% { transform: translateY(-15px) rotate(1deg); }
+            66% { transform: translateY(5px) rotate(-1deg); }
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+            50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.9), 0 0 40px rgba(16, 185, 129, 0.5); }
+        }
+        
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        
+        @keyframes ripple {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(4); opacity: 0; }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+            opacity: 0;
+        }
+        
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        .animate-pulse-glow {
+            animation: pulse-glow 2.5s ease-in-out infinite;
+        }
+        
+        .animate-slide-left {
+            animation: slideInLeft 0.8s ease-out forwards;
+            opacity: 0;
+        }
+        
+        .animate-slide-right {
+            animation: slideInRight 0.8s ease-out forwards;
+            opacity: 0;
+        }
+        
+        .animate-shimmer {
+            background: linear-gradient(90deg, #f0f9ff 0%, #e0f2fe 50%, #f0f9ff 100%);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite linear;
+        }
+        
+        /* Glass morphism effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+        }
+        
+        .glass-card-dark {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: linear-gradient(180deg, #f1f1f1 0%, #e2e8f0 100%);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #3b82f6 0%, #06b6d4 100%);
+            border-radius: 10px;
+        }
+        
+        /* Enhanced loading spinner */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border-left-color: #3b82f6;
+            border-right-color: #06b6d4;
+            animation: spin 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6, #06b6d4, #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            background-size: 300% 300%;
+            animation: gradient-shift 3s ease infinite;
+        }
+        
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        /* Particle animation */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.4), transparent);
+            animation: float 15s infinite linear;
+        }
+        
+        /* Hover effects */
+        .hover-lift {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-8px);
+        }
+        
+        /* Card glow effect */
+        .card-glow {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-glow::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #3b82f6, #06b6d4, #8b5cf6);
+            z-index: -1;
+            filter: blur(20px);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        
+        .card-glow:hover::before {
+            opacity: 0.6;
+        }
+        
+        /* Page loader */
+        .page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+        
+        .loader-content {
+            text-align: center;
+        }
+        
+        .loader-dots {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        .loader-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #3b82f6;
+            animation: dot-pulse 1.5s infinite ease-in-out;
+        }
+        
+        .loader-dot:nth-child(2) { animation-delay: 0.2s; background: #06b6d4; }
+        .loader-dot:nth-child(3) { animation-delay: 0.4s; background: #8b5cf6; }
+        
+        @keyframes dot-pulse {
+            0%, 60%, 100% { transform: scale(1); opacity: 0.5; }
+            30% { transform: scale(1.5); opacity: 1; }
+        }
+        
+        /* Ripple button effect */
+        .ripple-button {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ripple-button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+        
+        .ripple-button:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+        
+        /* Typewriter effect */
+        .typewriter {
+            overflow: hidden;
+            border-right: 3px solid #3b82f6;
+            white-space: nowrap;
+            animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+        
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #3b82f6 }
+        }
+        
+        /* Image hover zoom */
+        .image-zoom {
+            transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .image-zoom:hover {
+            transform: scale(1.05);
+        }
+        
+        /* Floating elements */
+        .floating-element {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        /* Progress bar animation */
+        .progress-bar {
+            animation: progress-fill 2s ease-out forwards;
+            transform-origin: left;
+            transform: scaleX(0);
+        }
+        
+        @keyframes progress-fill {
+            to { transform: scaleX(1); }
+        }
+        
+        /* Neon glow for important elements */
+        .neon-glow {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5),
+                        0 0 30px rgba(16, 185, 129, 0.3),
+                        0 0 45px rgba(139, 92, 246, 0.2);
+        }
+    </style>
+</head>
+<body class="text-slate-900">
+    
+    <!-- Page Loader -->
+    <div id="pageLoader" class="page-loader">
+        <div class="loader-content">
+            <div class="spinner mb-6"></div>
+            <h3 class="text-2xl font-bold gradient-text mb-4">HealthPredict AI</h3>
+            <p class="text-slate-600">Initializing predictive analytics engine...</p>
+            <div class="loader-dots">
+                <div class="loader-dot"></div>
+                <div class="loader-dot"></div>
+                <div class="loader-dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 glass-card border-b border-slate-200/50 transition-all duration-300 hover:shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2 animate-slide-left">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-teal-500 rounded-xl flex items-center justify-center animate-pulse-glow floating-element">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    </div>
+                    <span class="text-2xl font-bold gradient-text">ICARE</span>
+                    <span class="text-xs bg-gradient-to-r from-blue-600 to-teal-500 text-white px-2 py-1 rounded-full">AI v2.0</span>
+                </div>
+                <div class="hidden md:flex space-x-8 animate-fade-in-up" style="animation-delay: 0.2s">
+                    <a href="#" class="relative text-slate-600 hover:text-blue-600 transition duration-300 group">
+                        <span>Features</span>
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-teal-500 group-hover:w-full transition-all duration-300"></span>
+                    </a>
+                    <a href="#" class="relative text-slate-600 hover:text-blue-600 transition duration-300 group">
+                        <span>Analytics</span>
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-teal-500 group-hover:w-full transition-all duration-300"></span>
+                    </a>
+                    <a href="#" class="relative text-slate-600 hover:text-blue-600 transition duration-300 group">
+                        <span>Research</span>
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-teal-500 group-hover:w-full transition-all duration-300"></span>
+                    </a>
+                    <a href="#" class="relative text-slate-600 hover:text-blue-600 transition duration-300 group">
+                        <span>Contact</span>
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-teal-500 group-hover:w-full transition-all duration-300"></span>
+                    </a>
+                </div>
+                <div class="flex items-center gap-4 animate-slide-right">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'logout' %}" class="text-blue-600 font-medium hover:text-blue-700 transition duration-300 hover-lift">Logout</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="text-blue-600 font-medium hover:text-blue-700 transition duration-300 hover-lift">Login</a>
+                    
+                    <a href="{% url 'signup' %}" class="ripple-button bg-gradient-to-r from-blue-600 to-teal-500 text-white px-6 py-3 rounded-full font-medium hover:shadow-xl hover:shadow-blue-200 transition duration-300 transform hover:-translate-y-1 neon-glow">
+                        Get Started
+                        <i class="fas fa-arrow-right ml-2 transition-transform group-hover:translate-x-1"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Enhanced Banner -->
+    <header class="relative pt-20 pb-40 overflow-hidden">
+        <!-- Animated Background Particles -->
+        <div id="particles-container" class="absolute inset-0 z-0">
+            <!-- Particles will be generated by JavaScript -->
+        </div>
+        
+        <!-- Gradient Blobs -->
+        <div class="absolute inset-0 z-0">
+            <div class="absolute top-0 left-0 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
+            <div class="absolute bottom-0 right-0 w-96 h-96 bg-teal-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" style="animation-delay: 1.5s"></div>
+            <div class="absolute top-1/2 left-1/3 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" style="animation-delay: 3s"></div>
+            <div class="absolute top-1/4 right-1/4 w-64 h-64 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" style="animation-delay: 2s"></div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <div class="animate-fade-in-up">
+                <div class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-teal-50 text-blue-700 px-5 py-2.5 rounded-full mb-8 border border-blue-100 hover-lift">
+                    <span class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-gradient-to-r from-blue-500 to-teal-500"></span>
+                    </span>
+                    <span class="font-medium">✨ Now with Real-time Multi-Disease Predictions</span>
+                    <span class="ml-2 px-2 py-1 bg-gradient-to-r from-blue-600 to-teal-500 text-white text-xs rounded-full animate-pulse">NEW</span>
+                </div>
+                
+                <h1 class="text-5xl md:text-7xl lg:text-8xl font-extrabold text-slate-900 tracking-tight mb-6 leading-tight">
+                    <span class="typewriter block">AI-Powered</span>
+                    <span class="gradient-text block my-4">Healthcare Intelligence</span>
+                    <span class="text-slate-800 block">Predictive Analytics Platform</span>
+                </h1>
+                <p class="text-xl md:text-2xl text-slate-600 max-w-4xl mx-auto mb-10 leading-relaxed animate-fade-in-up" style="animation-delay: 0.3s">
+                    Leverage advanced Deep Learning models to predict disease risks, analyze patient data in real-time, and make data-driven clinical decisions with 
+                    <span class="font-bold text-blue-600">98.7% accuracy</span>.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-6 mb-16 animate-fade-in-up" style="animation-delay: 0.5s">
+                    <a href="{% url 'dashboard' %}" class="group ripple-button bg-gradient-to-r from-slate-900 to-slate-800 text-white px-10 py-5 rounded-xl font-semibold hover:bg-slate-900 transition duration-300 transform hover:-translate-y-1 hover:shadow-2xl flex items-center justify-center gap-3 neon-glow">
+                        <i class="fas fa-bolt text-yellow-400"></i>
+                        <span>Try Live Predictor</span>
+                        <svg class="w-5 h-5 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+                    <button class="group glass-card border border-slate-200 text-slate-700 px-10 py-5 rounded-xl font-semibold hover:bg-white transition duration-300 transform hover:-translate-y-1 hover:shadow-xl flex items-center justify-center gap-3 hover-lift">
+                        <i class="fas fa-play-circle text-blue-500 text-xl"></i>
+                        <span>Watch Demo</span>
+                        <i class="fas fa-external-link-alt text-sm text-slate-400 group-hover:text-blue-500 transition"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Enhanced Banner with Image Cards -->
+            <div class="relative rounded-3xl overflow-hidden shadow-2xl mt-16 animate-fade-in-up" style="animation-delay: 0.7s">
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-600/90 via-teal-500/80 to-purple-600/70 z-10"></div>
+                <div class="absolute inset-0 z-5" style="background: url('https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover;"></div>
+                
+                <div class="relative z-20 flex flex-col md:flex-row items-center justify-between p-8 md:p-12">
+                    <div class="text-center md:text-left mb-8 md:mb-0 md:mr-12 max-w-lg">
+                        <h3 class="text-3xl md:text-4xl font-bold text-white mb-6">Transforming Healthcare with AI & ML</h3>
+                        <p class="text-white/90 text-lg mb-8">Upload medical datasets and receive predictive insights in seconds with our advanced ensemble models and neural networks.</p>
+                        <a href="{% url 'dashboard' %}" class="bg-white text-blue-600 px-8 py-3 rounded-xl font-semibold hover:bg-blue-50 transition duration-300 flex items-center gap-2 mx-auto md:mx-0 inline-flex">
+                            <i class="fas fa-rocket"></i>
+                            <span>Start Free Trial</span>
+                        </a>
+                    </div>
+                    
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
+                        <div class="glass-card-dark p-6 rounded-2xl text-center transform hover:-translate-y-2 transition duration-300 card-glow">
+                            <div class="text-3xl md:text-4xl font-bold text-white mb-2 flex items-center justify-center">
+                                <span class="gradient-text">98.7%</span>
+                            </div>
+                            <div class="text-white/80 text-sm">Prediction Accuracy</div>
+                            <div class="mt-3 w-full bg-slate-700 rounded-full h-2">
+                                <div class="bg-gradient-to-r from-green-400 to-teal-400 h-2 rounded-full progress-bar" style="width: 98.7%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-card-dark p-6 rounded-2xl text-center transform hover:-translate-y-2 transition duration-300 card-glow">
+                            <div class="text-3xl md:text-4xl font-bold text-white mb-2">50+</div>
+                            <div class="text-white/80 text-sm">Disease Models</div>
+                            <div class="mt-3 flex justify-center">
+                                <i class="fas fa-brain text-teal-400 text-xl"></i>
+                                <i class="fas fa-network-wired text-blue-400 text-xl mx-2"></i>
+                                <i class="fas fa-chart-line text-purple-400 text-xl"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-card-dark p-6 rounded-2xl text-center transform hover:-translate-y-2 transition duration-300 card-glow">
+                            <div class="text-3xl md:text-4xl font-bold text-white mb-2">15K+</div>
+                            <div class="text-white/80 text-sm">Analyses/Month</div>
+                            <div class="mt-3 text-blue-300">
+                                <i class="fas fa-trending-up"></i>
+                                <span class="text-xs ml-1">↑ 42% this month</span>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-card-dark p-6 rounded-2xl text-center transform hover:-translate-y-2 transition duration-300 card-glow">
+                            <div class="text-3xl md:text-4xl font-bold text-white mb-2">24/7</div>
+                            <div class="text-white/80 text-sm">Real-time Monitoring</div>
+                            <div class="mt-3">
+                                <span class="inline-block w-3 h-3 bg-green-400 rounded-full animate-pulse"></span>
+                                <span class="text-xs text-green-400 ml-2">Live</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Features Section - Enhanced -->
+    <section class="py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20 animate-fade-in-up">
+                <div class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-purple-50 px-4 py-2 rounded-full mb-6">
+                    <i class="fas fa-star text-yellow-500"></i>
+                    <span class="font-medium text-slate-700">Why Healthcare Leaders Choose Us</span>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-bold text-slate-900 mb-6">Advanced Healthcare AI Platform</h2>
+                <p class="text-lg text-slate-600 max-w-3xl mx-auto">Our platform combines cutting-edge machine learning with healthcare expertise to deliver actionable insights that transform patient outcomes.</p>
+                <div class="w-32 h-1.5 bg-gradient-to-r from-blue-600 to-teal-500 mx-auto mt-8 rounded-full progress-bar"></div>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+                <!-- Feature 1 - Enhanced -->
+                <div class="group p-8 rounded-2xl glass-card border border-slate-100 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 animate-fade-in-up card-glow">
+                    <div class="relative mb-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-lg">
+                            <i class="fas fa-cloud-upload-alt text-2xl"></i>
+                        </div>
+                        <div class="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-blue-600 to-teal-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                            1
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 group-hover:text-blue-600 transition">Smart Data Integration</h3>
+                    <p class="text-slate-600 mb-6">Upload medical datasets in CSV, Excel, or connect directly to EHR systems. Our AI handles data cleaning and preprocessing automatically.</p>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-center text-slate-700">
+                            <div class="w-2 h-2 bg-gradient-to-r from-blue-600 to-teal-500 rounded-full mr-3"></div>
+                            <span>Support for 20+ medical data formats</span>
+                        </li>
+                        <li class="flex items-center text-slate-700">
+                            <div class="w-2 h-2 bg-gradient-to-r from-blue-600 to-teal-500 rounded-full mr-3"></div>
+                            <span>Automatic data validation & cleaning</span>
+                        </li>
+                        <li class="flex items-center text-slate-700">
+                            <div class="w-2 h-2 bg-gradient-to-r from-blue-600 to-teal-500 rounded-full mr-3"></div>
+                            <span>HIPAA compliant data handling</span>
+                        </li>
+                    </ul>
+                    <div class="pt-4 border-t border-slate-100">
+                        <span class="text-sm font-medium text-blue-600">Learn more <i class="fas fa-arrow-right ml-1 group-hover:translate-x-1 transition-transform"></i></span>
+                    </div>
+                </div>
+
+                <!-- Feature 2 - Enhanced -->
+                <div class="group p-8 rounded-2xl glass-card border border-slate-100 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 animate-fade-in-up card-glow" style="animation-delay: 0.1s">
+                    <div class="relative mb-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-lg">
+                            <i class="fas fa-chart-network text-2xl"></i>
+                        </div>
+                        <div class="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-blue-600 to-teal-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                            2
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 group-hover:text-teal-600 transition">Intelligent EDA & Visualization</h3>
+                    <p class="text-slate-600 mb-6">Discover hidden patterns with automated Exploratory Data Analysis and interactive visual reports. Generate insights in seconds.</p>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-center text-slate-700">
+                            <div class="w-2 h-2 bg-gradient-to-r from-blue-600 to-teal-500 rounded-full mr-3"></div>
+                            <span>Interactive 3D charts & dashboards</span>
+                        </li>
+                        <li class="flex items-center text-slate-700">
+                            <div class="w-2 h-2 bg-gradient-to-r from-blue-600 to-teal-500 rounded-full mr-3"></div>
+                            <span>Correlation & trend analysis</span>
+                        </li>
+                        <li class="flex items-center text-slate-700">
+                            <div class="w-2 h-2 bg-gradient-to-r from-blue-600 to-teal-500 rounded-full mr-3"></div>
+                            <span>Automated report generation</span>
+                        </li>
+                    </ul>
+                    <div class="pt-4 border-t border-slate-100">
+                        <span class="text-sm font-medium text-teal-600">Learn more <i class="fas fa-arrow-right ml-1 group-hover:translate-x-1 transition-transform"></i></span>
+                    </div>
+                </div>
+
+                <!-- Feature 3 - Enhanced -->
+                <div class="group p-8 rounded-2xl glass-card border border-slate-100 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 animate-fade-in-up card-glow" style="animation-delay: 0.2s">
+                    <div class="relative mb-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-lg">
+                            <i class="fas fa-robot text-2xl"></i>
+                        </div>
+                        <div class="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-blue-600 to-teal-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                            3
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 group-hover:text-purple-600 transition">Advanced Predictive Models</h3>
+                    <p class="text-slate-600 mb-6">Uses ensemble models like Random Forest, XGBoost, and Deep Neural Networks for highly accurate disease risk scoring.</p>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-center text-slate-700">
+                            <div class="w-2 h-2 bg-gradient-to-r from-blue-600 to-teal-500 rounded-full mr-3"></div>
+                            <span>50+ pre-trained disease models</span>
+                        </li>
+                        <li class="flex items-center text-slate-700">
+                            <div class="w-2 h-2 bg-gradient-to-r from-blue-600 to-teal-500 rounded-full mr-3"></div>
+                            <span>Real-time prediction API</span>
+                        </li>
+                        <li class="flex items-center text-slate-700">
+                            <div class="w-2 h-2 bg-gradient-to-r from-blue-600 to-teal-500 rounded-full mr-3"></div>
+                            <span>Model explainability (SHAP, LIME)</span>
+                        </li>
+                    </ul>
+                    <div class="pt-4 border-t border-slate-100">
+                        <span class="text-sm font-medium text-purple-600">Learn more <i class="fas fa-arrow-right ml-1 group-hover:translate-x-1 transition-transform"></i></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Additional Features Row -->
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Feature 4 - New -->
+                <div class="group p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-white border border-blue-100 hover:shadow-xl transition-all duration-500 animate-fade-in-up" style="animation-delay: 0.3s">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-shield-alt text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold mb-2">Military-Grade Security</h4>
+                            <p class="text-slate-600">End-to-end encryption, HIPAA compliance, and SOC 2 Type II certification ensure your data remains secure.</p>
+                            <div class="flex gap-2 mt-4">
+                                <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">HIPAA</span>
+                                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">GDPR</span>
+                                <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">SOC 2</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Feature 5 - New -->
+                <div class="group p-8 rounded-2xl bg-gradient-to-br from-teal-50 to-white border border-teal-100 hover:shadow-xl transition-all duration-500 animate-fade-in-up" style="animation-delay: 0.4s">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-bolt text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold mb-2">Real-time Processing</h4>
+                            <p class="text-slate-600">Process and analyze data in real-time with our distributed computing infrastructure. Get results in seconds, not hours.</p>
+                            <div class="flex items-center mt-4 text-teal-600">
+                                <i class="fas fa-tachometer-alt mr-2"></i>
+                                <span class="text-sm font-medium">Avg. processing time: 3.2 seconds</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Image Cards Gallery Section -->
+    <section class="py-24 bg-gradient-to-b from-white to-blue-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 animate-fade-in-up">
+                <h2 class="text-4xl font-bold text-slate-900 mb-4">AI in Action: Real Healthcare Applications</h2>
+                <p class="text-lg text-slate-600 max-w-2xl mx-auto">See how our AI platform is transforming healthcare across different specialties</p>
+                <div class="w-24 h-1.5 bg-gradient-to-r from-blue-600 to-teal-500 mx-auto mt-6 rounded-full"></div>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Image Card 1 -->
+                <div class="group rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 animate-fade-in-up">
+                    <div class="relative h-64 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1551601651-2a8555f1a136?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="Cardiology AI Analysis" 
+                             class="w-full h-full object-cover image-zoom">
+                        <div class="absolute inset-0 bg-gradient-to-t from-blue-900/70 to-transparent"></div>
+                        <div class="absolute top-4 right-4">
+                            <span class="px-3 py-1 bg-gradient-to-r from-blue-600 to-teal-500 text-white rounded-full text-xs font-bold">NEW</span>
+                        </div>
+                    </div>
+                    <div class="p-6 bg-white">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="w-10 h-10 bg-gradient-to-r from-red-100 to-red-50 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-heartbeat text-red-500"></i>
+                            </div>
+                            <h3 class="text-xl font-bold">Cardiology AI</h3>
+                        </div>
+                        <p class="text-slate-600 mb-4">Predict cardiovascular diseases with 96% accuracy using ECG and patient history analysis.</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-slate-500">3 models available</span>
+                            <button class="text-blue-600 font-medium hover:text-blue-800 transition flex items-center gap-1">
+                                Explore <i class="fas fa-arrow-right text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Image Card 2 -->
+                <div class="group rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 animate-fade-in-up" style="animation-delay: 0.1s">
+                    <div class="relative h-64 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1559757175-0eb30cd8c063?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="Oncology Prediction" 
+                             class="w-full h-full object-cover image-zoom">
+                        <div class="absolute inset-0 bg-gradient-to-t from-purple-900/70 to-transparent"></div>
+                    </div>
+                    <div class="p-6 bg-white">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="w-10 h-10 bg-gradient-to-r from-purple-100 to-purple-50 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-dna text-purple-500"></i>
+                            </div>
+                            <h3 class="text-xl font-bold">Oncology Prediction</h3>
+                        </div>
+                        <p class="text-slate-600 mb-4">Early cancer detection using genomic data and medical imaging with deep learning algorithms.</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-slate-500">12 models available</span>
+                            <button class="text-blue-600 font-medium hover:text-blue-800 transition flex items-center gap-1">
+                                Explore <i class="fas fa-arrow-right text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Image Card 3 -->
+                <div class="group rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 animate-fade-in-up" style="animation-delay: 0.2s">
+                    <div class="relative h-64 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1551076805-e1869033e561?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="Neurology Diagnostics" 
+                             class="w-full h-full object-cover image-zoom">
+                        <div class="absolute inset-0 bg-gradient-to-t from-teal-900/70 to-transparent"></div>
+                    </div>
+                    <div class="p-6 bg-white">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="w-10 h-10 bg-gradient-to-r from-teal-100 to-teal-50 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-brain text-teal-500"></i>
+                            </div>
+                            <h3 class="text-xl font-bold">Neurology Diagnostics</h3>
+                        </div>
+                        <p class="text-slate-600 mb-4">Predict neurodegenerative diseases using MRI scans and cognitive assessment data.</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-slate-500">8 models available</span>
+                            <button class="text-blue-600 font-medium hover:text-blue-800 transition flex items-center gap-1">
+                                Explore <i class="fas fa-arrow-right text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section - Enhanced -->
+    <section class="py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20 animate-fade-in-up">
+                <h2 class="text-4xl md:text-5xl font-bold text-slate-900 mb-6">From Data to Insights in Minutes</h2>
+                <p class="text-lg text-slate-600 max-w-2xl mx-auto">Our streamlined process takes you from raw data to actionable insights in four simple steps</p>
+                <div class="w-32 h-1.5 bg-gradient-to-r from-blue-600 to-teal-500 mx-auto mt-8 rounded-full progress-bar"></div>
+            </div>
+            
+            <div class="relative">
+                <!-- Connecting line for steps -->
+                <div class="hidden lg:block absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-blue-200 to-teal-200 -translate-y-1/2 z-0"></div>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
+                    <!-- Step 1 - Enhanced -->
+                    <div class="relative text-center group">
+                        <div class="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-r from-blue-600 to-teal-500 text-white rounded-full flex items-center justify-center text-lg font-bold shadow-lg floating-element">1</div>
+                        <div class="p-8 pt-12 rounded-2xl glass-card border border-slate-100 hover:shadow-2xl transition-all duration-500 group-hover:border-blue-300 group-hover:bg-gradient-to-br from-blue-50 to-white">
+                            <div class="w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-500 shadow-inner">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-blue-600"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4">Upload & Connect</h3>
+                            <p class="text-slate-600 mb-6">Upload medical datasets in any format or connect directly to EHR/EMR systems. Our AI handles the rest.</p>
+                            <div class="text-sm text-blue-600 font-medium">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                <span>Auto-detects data types</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2 - Enhanced -->
+                    <div class="relative text-center group">
+                        <div class="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-r from-blue-600 to-teal-500 text-white rounded-full flex items-center justify-center text-lg font-bold shadow-lg floating-element">2</div>
+                        <div class="p-8 pt-12 rounded-2xl glass-card border border-slate-100 hover:shadow-2xl transition-all duration-500 group-hover:border-teal-300 group-hover:bg-gradient-to-br from-teal-50 to-white">
+                            <div class="w-24 h-24 bg-gradient-to-br from-teal-100 to-teal-50 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-500 shadow-inner">
+                                <i class="fas fa-chart-bar text-4xl text-teal-600"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4">AI Analysis</h3>
+                            <p class="text-slate-600 mb-6">Our AI automatically cleans data, detects patterns, and generates comprehensive visual insights.</p>
+                            <div class="text-sm text-teal-600 font-medium">
+                                <i class="fas fa-bolt mr-2"></i>
+                                <span>Real-time processing</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3 - Enhanced -->
+                    <div class="relative text-center group">
+                        <div class="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-r from-blue-600 to-teal-500 text-white rounded-full flex items-center justify-center text-lg font-bold shadow-lg floating-element">3</div>
+                        <div class="p-8 pt-12 rounded-2xl glass-card border border-slate-100 hover:shadow-2xl transition-all duration-500 group-hover:border-purple-300 group-hover:bg-gradient-to-br from-purple-50 to-white">
+                            <div class="w-24 h-24 bg-gradient-to-br from-purple-100 to-purple-50 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-500 shadow-inner">
+                                <i class="fas fa-cogs text-4xl text-purple-600"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4">Model Training</h3>
+                            <p class="text-slate-600 mb-6">Select from 50+ pre-trained models or auto-train custom models for your specific prediction task.</p>
+                            <div class="text-sm text-purple-600 font-medium">
+                                <i class="fas fa-brain mr-2"></i>
+                                <span>AutoML capabilities</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 4 - Enhanced -->
+                    <div class="relative text-center group">
+                        <div class="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-r from-blue-600 to-teal-500 text-white rounded-full flex items-center justify-center text-lg font-bold shadow-lg floating-element">4</div>
+                        <div class="p-8 pt-12 rounded-2xl glass-card border border-slate-100 hover:shadow-2xl transition-all duration-500 group-hover:border-green-300 group-hover:bg-gradient-to-br from-green-50 to-white">
+                            <div class="w-24 h-24 bg-gradient-to-br from-green-100 to-green-50 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-500 shadow-inner">
+                                <i class="fas fa-chart-line text-4xl text-green-600"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4">Actionable Insights</h3>
+                            <p class="text-slate-600 mb-6">Receive predictions, risk scores, and actionable clinical recommendations with full explainability.</p>
+                            <div class="text-sm text-green-600 font-medium">
+                                <i class="fas fa-file-medical-alt mr-2"></i>
+                                <span>Export ready reports</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Prediction Section - Enhanced -->
+    <section class="py-24 bg-gradient-to-b from-blue-50 to-white">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 animate-fade-in-up">
+                <div class="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm mb-6">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    <span class="font-medium text-slate-700">Live Demo Available</span>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-bold text-slate-900 mb-6">Try Our AI Predictor</h2>
+                <p class="text-lg text-slate-600 max-w-2xl mx-auto">Experience our advanced diabetes prediction model in real-time. No data leaves your browser.</p>
+                <div class="w-32 h-1.5 bg-gradient-to-r from-blue-600 to-teal-500 mx-auto mt-8 rounded-full progress-bar"></div>
+            </div>
+            
+            <div class="bg-white rounded-3xl shadow-2xl overflow-hidden animate-fade-in-up" style="animation-delay: 0.2s">
+                <div class="p-8 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-teal-50">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between">
+                        <div>
+                            <h3 class="text-2xl md:text-3xl font-bold mb-2">Diabetes Risk Prediction</h3>
+                            <p class="text-slate-600">Enter patient data below to calculate diabetes risk probability using our ensemble ML model</p>
+                        </div>
+                        <div class="mt-4 md:mt-0">
+                            <div class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-teal-500 text-white px-4 py-2 rounded-full">
+                                <i class="fas fa-shield-alt"></i>
+                                <span class="text-sm">Private & Secure</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-8">
+                    <div id="loadingIndicator" class="hidden flex-col items-center justify-center py-16">
+                        <div class="spinner mb-8"></div>
+                        <p class="text-xl font-medium text-slate-800 mb-2">Analyzing patient data with AI models...</p>
+                        <p class="text-slate-500 mb-4">Our neural network is processing 15+ health parameters</p>
+                        <div class="w-64 bg-slate-200 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-blue-600 to-teal-500 h-2 rounded-full progress-bar"></div>
+                        </div>
+                    </div>
+                    
+                    <div id="predictionForm">
+                        <div class="grid md:grid-cols-2 gap-8 mb-10">
+                            <div class="space-y-6">
+                                <div class="group">
+                                    <div class="flex justify-between items-center mb-3">
+                                        <label class="block text-slate-700 font-medium">Glucose Level (mg/dL)</label>
+                                        <span class="text-sm text-slate-500">Normal: 70-100</span>
+                                    </div>
+                                    <input type="range" min="70" max="200" value="120" class="w-full h-3 bg-gradient-to-r from-green-200 via-yellow-200 to-red-200 rounded-lg appearance-none cursor-pointer group-hover:h-4 transition-all" id="glucoseSlider">
+                                    <div class="flex justify-between text-sm text-slate-500 mt-2">
+                                        <span>70</span>
+                                        <span id="glucoseValue" class="font-bold text-blue-600 text-lg">120</span>
+                                        <span>200</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="group">
+                                    <div class="flex justify-between items-center mb-3">
+                                        <label class="block text-slate-700 font-medium">BMI</label>
+                                        <span class="text-sm text-slate-500">Healthy: 18.5-24.9</span>
+                                    </div>
+                                    <input type="range" min="18" max="40" value="25" class="w-full h-3 bg-gradient-to-r from-green-200 via-yellow-200 to-red-200 rounded-lg appearance-none cursor-pointer group-hover:h-4 transition-all" id="bmiSlider">
+                                    <div class="flex justify-between text-sm text-slate-500 mt-2">
+                                        <span>18</span>
+                                        <span id="bmiValue" class="font-bold text-blue-600 text-lg">25</span>
+                                        <span>40</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-6">
+                                <div>
+                                    <div class="flex justify-between items-center mb-3">
+                                        <label class="block text-slate-700 font-medium">Age</label>
+                                        <span class="text-sm text-slate-500">Years</span>
+                                    </div>
+                                    <div class="flex gap-4 items-center">
+                                        <button class="w-12 h-12 bg-gradient-to-r from-blue-100 to-blue-50 text-blue-600 rounded-xl hover:from-blue-200 hover:to-blue-100 transition flex items-center justify-center group" data-age="-">
+                                            <i class="fas fa-minus group-hover:scale-110 transition"></i>
+                                        </button>
+                                        <div class="flex-1 text-center">
+                                            <span id="ageValue" class="text-4xl font-bold text-slate-900">35</span>
+                                            <div class="text-sm text-slate-500 mt-1">years</div>
+                                        </div>
+                                        <button class="w-12 h-12 bg-gradient-to-r from-blue-100 to-blue-50 text-blue-600 rounded-xl hover:from-blue-200 hover:to-blue-100 transition flex items-center justify-center group" data-age="+">
+                                            <i class="fas fa-plus group-hover:scale-110 transition"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-slate-700 mb-3 font-medium">Blood Pressure (mmHg)</label>
+                                    <select id="bpSelect" class="w-full p-4 border border-slate-300 rounded-xl focus:ring-3 focus:ring-blue-500/30 focus:border-blue-500 transition bg-white">
+                                        <option value="normal">Normal (&lt; 120/80)</option>
+                                        <option value="elevated">Elevated (120-129/&lt;80)</option>
+                                        <option value="high1">High Stage 1 (130-139/80-89)</option>
+                                        <option value="high2">High Stage 2 (≥140/≥90)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-8">
+                            <h4 class="text-lg font-medium text-slate-800 mb-4">Additional Health Factors</h4>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="familyHistory" class="mr-3 w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                                    <label for="familyHistory" class="text-slate-700">Family History</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="smoking" class="mr-3 w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                                    <label for="smoking" class="text-slate-700">Smoking</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="exercise" class="mr-3 w-5 h-5 text-blue-600 rounded focus:ring-blue-500" checked>
+                                    <label for="exercise" class="text-slate-700">Regular Exercise</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="diet" class="mr-3 w-5 h-5 text-blue-600 rounded focus:ring-blue-500" checked>
+                                    <label for="diet" class="text-slate-700">Healthy Diet</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button id="predictButton" class="group w-full py-5 bg-gradient-to-r from-blue-600 to-teal-500 text-white font-bold rounded-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 ripple-button neon-glow">
+                            <i class="fas fa-brain mr-3"></i>
+                            <span>Predict Diabetes Risk</span>
+                            <i class="fas fa-arrow-right ml-3 group-hover:translate-x-2 transition-transform"></i>
+                        </button>
+                    </div>
+                    
+                    <div id="predictionResult" class="hidden mt-10 p-8 bg-gradient-to-br from-white to-blue-50 rounded-3xl border border-blue-100 shadow-lg">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h4 class="text-2xl font-bold text-slate-800">Prediction Results</h4>
+                                <p class="text-slate-600">Based on our ensemble ML model analysis</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <span class="px-4 py-2 bg-gradient-to-r from-green-100 to-green-50 text-green-800 rounded-full text-sm font-medium">
+                                    <i class="fas fa-shield-check mr-1"></i>95% Confidence
+                                </span>
+                                <span class="px-4 py-2 bg-gradient-to-r from-blue-100 to-blue-50 text-blue-800 rounded-full text-sm font-medium">
+                                    <i class="fas fa-clock mr-1"></i>Generated in 2.4s
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-8">
+                            <div class="flex justify-between items-center mb-3">
+                                <div class="text-lg font-medium text-slate-700">Diabetes Risk Probability</div>
+                                <span id="riskPercentage" class="text-4xl font-bold text-slate-900">30%</span>
+                            </div>
+                            <div class="w-full bg-slate-200 rounded-full h-4">
+                                <div id="riskBar" class="h-4 rounded-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500 progress-bar" style="width: 30%"></div>
+                            </div>
+                            <div class="flex justify-between text-sm text-slate-500 mt-2">
+                                <span>Low Risk</span>
+                                <span>Moderate</span>
+                                <span>High Risk</span>
+                            </div>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mb-8">
+                            <div class="bg-white p-6 rounded-2xl border border-slate-100 hover:shadow-lg transition hover-lift">
+                                <div class="text-sm text-slate-500 mb-2">Risk Level</div>
+                                <div id="riskLevel" class="text-2xl font-bold text-green-600">LOW</div>
+                                <div class="text-sm text-slate-500 mt-2">Within normal range</div>
+                            </div>
+                            <div class="bg-white p-6 rounded-2xl border border-slate-100 hover:shadow-lg transition hover-lift">
+                                <div class="text-sm text-slate-500 mb-2">Recommended Action</div>
+                                <div id="recommendedAction" class="text-2xl font-bold text-slate-800">Monitor</div>
+                                <div class="text-sm text-slate-500 mt-2">Annual screening recommended</div>
+                            </div>
+                            <div class="bg-white p-6 rounded-2xl border border-slate-100 hover:shadow-lg transition hover-lift">
+                                <div class="text-sm text-slate-500 mb-2">Next Screening</div>
+                                <div id="nextScreening" class="text-2xl font-bold text-slate-800">12 months</div>
+                                <div class="text-sm text-slate-500 mt-2">Follow-up timeline</div>
+                            </div>
+                        </div>
+                        
+                        <div class="pt-6 border-t border-slate-200">
+                            <h5 class="font-medium text-slate-700 mb-3">AI Recommendations</h5>
+                            <ul class="space-y-2">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                    <span class="text-slate-600">Maintain current healthy lifestyle habits</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                    <span class="text-slate-600">Continue regular exercise 3-5 times per week</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                    <span class="text-slate-600">Monitor glucose levels annually</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Enhanced Footer -->
+    <footer class="bg-gradient-to-br from-slate-900 to-slate-800 text-slate-400 py-20">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                <div>
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-teal-500 rounded-xl flex items-center justify-center animate-pulse-glow">
+                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        </div>
+                        <div>
+                            <span class="text-2xl font-bold text-white block">HealthPredict</span>
+                            <span class="text-sm text-slate-400">AI Healthcare Platform</span>
+                        </div>
+                    </div>
+                    <p class="text-slate-400 mb-6">Empowering healthcare professionals with AI-driven predictive analytics for better patient outcomes and clinical decisions.</p>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center hover:bg-gradient-to-r from-blue-600 to-teal-500 transition">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center hover:bg-gradient-to-r from-blue-600 to-teal-500 transition">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center hover:bg-gradient-to-r from-blue-600 to-teal-500 transition">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center hover:bg-gradient-to-r from-blue-600 to-teal-500 transition">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-bold text-lg mb-8">Product</h4>
+                    <ul class="space-y-4">
+                        <li><a href="#" class="hover:text-white transition flex items-center group">
+                            <i class="fas fa-arrow-right text-xs text-blue-500 mr-3 opacity-0 group-hover:opacity-100 transition"></i>
+                            Features
+                        </a></li>
+                        <li><a href="#" class="hover:text-white transition flex items-center group">
+                            <i class="fas fa-arrow-right text-xs text-blue-500 mr-3 opacity-0 group-hover:opacity-100 transition"></i>
+                            Pricing
+                        </a></li>
+                        <li><a href="#" class="hover:text-white transition flex items-center group">
+                            <i class="fas fa-arrow-right text-xs text-blue-500 mr-3 opacity-0 group-hover:opacity-100 transition"></i>
+                            API & Integration
+                        </a></li>
+                        <li><a href="#" class="hover:text-white transition flex items-center group">
+                            <i class="fas fa-arrow-right text-xs text-blue-500 mr-3 opacity-0 group-hover:opacity-100 transition"></i>
+                            Documentation
+                        </a></li>
+                        <li><a href="#" class="hover:text-white transition flex items-center group">
+                            <i class="fas fa-arrow-right text-xs text-blue-500 mr-3 opacity-0 group-hover:opacity-100 transition"></i>
+                            Release Notes
+                        </a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-bold text-lg mb-8">Resources</h4>
+                    <ul class="space-y-4">
+                        <li><a href="#" class="hover:text-white transition flex items-center group">
+                            <i class="fas fa-arrow-right text-xs text-teal-500 mr-3 opacity-0 group-hover:opacity-100 transition"></i>
+                            Research Papers
+                        </a></li>
+                        <li><a href="#" class="hover:text-white transition flex items-center group">
+                            <i class="fas fa-arrow-right text-xs text-teal-500 mr-3 opacity-0 group-hover:opacity-100 transition"></i>
+                            Case Studies
+                        </a></li>
+                        <li><a href="#" class="hover:text-white transition flex items-center group">
+                            <i class="fas fa-arrow-right text-xs text-teal-500 mr-3 opacity-0 group-hover:opacity-100 transition"></i>
+                            Healthcare Blog
+                        </a></li>
+                        <li><a href="#" class="hover:text-white transition flex items-center group">
+                            <i class="fas fa-arrow-right text-xs text-teal-500 mr-3 opacity-0 group-hover:opacity-100 transition"></i>
+                            Webinars
+                        </a></li>
+                        <li><a href="#" class="hover:text-white transition flex items-center group">
+                            <i class="fas fa-arrow-right text-xs text-teal-500 mr-3 opacity-0 group-hover:opacity-100 transition"></i>
+                            AI Ethics
+                        </a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-bold text-lg mb-8">Stay Updated</h4>
+                    <p class="mb-6 text-slate-400">Subscribe to our newsletter for the latest in healthcare AI research and product updates.</p>
+                    <div class="flex mb-6">
+                        <input type="email" placeholder="Your email address" class="flex-1 px-4 py-3 rounded-l-lg bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <button class="px-6 py-3 bg-gradient-to-r from-blue-600 to-teal-500 text-white font-medium rounded-r-lg hover:opacity-90 transition ripple-button">
+                            Subscribe
+                        </button>
+                    </div>
+                    <div class="text-sm text-slate-500">
+                        <i class="fas fa-lock mr-2"></i>
+                        We respect your privacy. Unsubscribe at any time.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pt-8 border-t border-slate-800">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="mb-4 md:mb-0">
+                        <p class="text-slate-500">&copy; 2025 HealthPredict AI System. All rights reserved.</p>
+                        <div class="flex flex-wrap gap-4 mt-2">
+                            <span class="text-sm px-3 py-1 bg-slate-800 rounded-full">HIPAA Compliant</span>
+                            <span class="text-sm px-3 py-1 bg-slate-800 rounded-full">SOC 2 Type II</span>
+                            <span class="text-sm px-3 py-1 bg-slate-800 rounded-full">GDPR Ready</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-6">
+                        <a href="#" class="text-slate-500 hover:text-white transition">Privacy Policy</a>
+                        <a href="#" class="text-slate-500 hover:text-white transition">Terms of Service</a>
+                        <a href="#" class="text-slate-500 hover:text-white transition">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to top button -->
+    <button id="backToTop" class="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-br from-blue-600 to-teal-500 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 opacity-0 transform translate-y-10 hover:scale-110 group">
+        <i class="fas fa-arrow-up"></i>
+        <div class="absolute -top-10 right-0 bg-slate-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+            Back to top
+        </div>
+    </button>
+
+    <!-- Floating Chat Assistant -->
+    <button id="chatAssistant" class="fixed bottom-8 left-8 w-14 h-14 bg-gradient-to-br from-purple-600 to-pink-500 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-110 group animate-float">
+        <i class="fas fa-robot"></i>
+        <div class="absolute -top-10 left-0 bg-slate-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+            AI Assistant
+        </div>
+        <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-ping"></span>
+    </button>
+
+    <script>
+        // Page Loader
+        const pageLoader = document.getElementById('pageLoader');
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                pageLoader.style.opacity = '0';
+                pageLoader.style.visibility = 'hidden';
+                
+                // Initialize animations after page load
+                setTimeout(() => {
+                    document.querySelectorAll('.animate-fade-in-up').forEach((el, index) => {
+                        el.style.animationDelay = `${index * 0.1}s`;
+                        el.style.opacity = '1';
+                    });
+                    
+                    document.querySelectorAll('.animate-slide-left').forEach((el, index) => {
+                        el.style.animationDelay = `${index * 0.1}s`;
+                        el.style.opacity = '1';
+                    });
+                    
+                    document.querySelectorAll('.animate-slide-right').forEach((el, index) => {
+                        el.style.animationDelay = `${index * 0.1}s`;
+                        el.style.opacity = '1';
+                    });
+                }, 300);
+            }, 1500);
+        });
+
+        // Particle Background
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            const colors = ['rgba(59, 130, 246, 0.3)', 'rgba(6, 182, 212, 0.3)', 'rgba(139, 92, 246, 0.3)'];
+            
+            for (let i = 0; i < 25; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random properties
+                const size = Math.random() * 20 + 5;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                const duration = Math.random() * 20 + 10;
+                const delay = Math.random() * 5;
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.background = color;
+                particle.style.left = `${posX}%`;
+                particle.style.top = `${posY}%`;
+                particle.style.animationDuration = `${duration}s`;
+                particle.style.animationDelay = `${delay}s`;
+                
+                container.appendChild(particle);
+            }
+        }
+        
+        // DOM elements
+        const tryPredictorBtn = document.getElementById('tryPredictor');
+        const predictButton = document.getElementById('predictButton');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const predictionForm = document.getElementById('predictionForm');
+        const predictionResult = document.getElementById('predictionResult');
+        const backToTopBtn = document.getElementById('backToTop');
+        const chatAssistant = document.getElementById('chatAssistant');
+        
+        // Slider value displays
+        const glucoseSlider = document.getElementById('glucoseSlider');
+        const glucoseValue = document.getElementById('glucoseValue');
+        const bmiSlider = document.getElementById('bmiSlider');
+        const bmiValue = document.getElementById('bmiValue');
+        const ageValue = document.getElementById('ageValue');
+        const ageButtons = document.querySelectorAll('[data-age]');
+        
+        // Result elements
+        const riskBar = document.getElementById('riskBar');
+        const riskPercentage = document.getElementById('riskPercentage');
+        const riskLevel = document.getElementById('riskLevel');
+        const recommendedAction = document.getElementById('recommendedAction');
+        const nextScreening = document.getElementById('nextScreening');
+        
+        // Initialize slider values
+        glucoseValue.textContent = glucoseSlider.value;
+        bmiValue.textContent = bmiSlider.value;
+        
+        // Create particles after DOM loads
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+        });
+        
+        // Update slider values in real-time with animation
+        glucoseSlider.addEventListener('input', () => {
+            glucoseValue.textContent = glucoseSlider.value;
+            glucoseValue.classList.add('animate-pulse');
+            setTimeout(() => glucoseValue.classList.remove('animate-pulse'), 300);
+        });
+        
+        bmiSlider.addEventListener('input', () => {
+            bmiValue.textContent = bmiSlider.value;
+            bmiValue.classList.add('animate-pulse');
+            setTimeout(() => bmiValue.classList.remove('animate-pulse'), 300);
+        });
+        
+        // Age buttons with animation
+        ageButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                let currentAge = parseInt(ageValue.textContent);
+                if (button.dataset.age === '+') {
+                    currentAge = Math.min(currentAge + 1, 100);
+                } else {
+                    currentAge = Math.max(currentAge - 1, 18);
+                }
+                ageValue.textContent = currentAge;
+                
+                // Add animation
+                ageValue.classList.add('animate-pulse');
+                setTimeout(() => ageValue.classList.remove('animate-pulse'), 300);
+            });
+        });
+        
+        // Try Predictor button scrolls to demo section with enhanced animation
+        tryPredictorBtn.addEventListener('click', () => {
+            const demoSection = document.querySelector('#predictionForm');
+            demoSection.scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'center'
+            });
+            
+            // Enhanced pulse animation
+            demoSection.parentElement.classList.add('neon-glow');
+            setTimeout(() => {
+                demoSection.parentElement.classList.remove('neon-glow');
+            }, 3000);
+            
+            // Add floating particles effect
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.position = 'fixed';
+                    particle.style.width = '10px';
+                    particle.style.height = '10px';
+                    particle.style.background = 'radial-gradient(circle, rgba(59, 130, 246, 0.6), transparent)';
+                    particle.style.borderRadius = '50%';
+                    particle.style.zIndex = '100';
+                    particle.style.left = `${Math.random() * 100}vw`;
+                    particle.style.top = '0';
+                    particle.style.animation = `float ${Math.random() * 2 + 1}s ease-in forwards`;
+                    
+                    document.body.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 2000);
+                }, i * 100);
+            }
+        });
+        
+        // Prediction button handler with enhanced loading
+        predictButton.addEventListener('click', () => {
+            // Show loading indicator with enhanced animation
+            loadingIndicator.classList.remove('hidden');
+            predictionForm.classList.add('opacity-30', 'pointer-events-none');
+            predictionResult.classList.add('hidden');
+            predictButton.disabled = true;
+            
+            // Add loading text animation
+            const loadingText = loadingIndicator.querySelector('p');
+            let dots = 0;
+            const loadingInterval = setInterval(() => {
+                dots = (dots + 1) % 4;
+                loadingText.textContent = 'Analyzing patient data with AI models' + '.'.repeat(dots);
+            }, 500);
+            
+            // Simulate AI processing time with enhanced calculation
+            setTimeout(() => {
+                // Calculate "risk" based on inputs (enhanced model)
+                const glucose = parseInt(glucoseSlider.value);
+                const bmi = parseFloat(bmiSlider.value);
+                const age = parseInt(ageValue.textContent);
+                const bp = document.getElementById('bpSelect').value;
+                const familyHistory = document.getElementById('familyHistory').checked;
+                const smoking = document.getElementById('smoking').checked;
+                const exercise = document.getElementById('exercise').checked;
+                const diet = document.getElementById('diet').checked;
+                
+                // Enhanced risk calculation
+                let risk = 0;
+                risk += (glucose - 100) * 0.25;
+                risk += (bmi - 22) * 1.8;
+                risk += (age - 30) * 0.4;
+                
+                // Blood pressure factor
+                const bpFactors = {
+                    normal: 0,
+                    elevated: 8,
+                    high1: 18,
+                    high2: 28
+                };
+                risk += bpFactors[bp];
+                
+                // Lifestyle factors
+                if (familyHistory) risk += 15;
+                if (smoking) risk += 12;
+                if (exercise) risk -= 8;
+                if (diet) risk -= 6;
+                
+                // Normalize risk to 0-100%
+                risk = Math.max(5, Math.min(95, risk));
+                
+                // Clear loading animation
+                clearInterval(loadingInterval);
+                
+                // Update UI with results with animation
+                setTimeout(() => {
+                    riskPercentage.textContent = `${Math.round(risk)}%`;
+                    
+                    // Animate the progress bar
+                    riskBar.style.transform = 'scaleX(0)';
+                    setTimeout(() => {
+                        riskBar.style.width = `${risk}%`;
+                        riskBar.style.transform = 'scaleX(1)';
+                    }, 100);
+                    
+                    // Determine risk level
+                    let riskLevelText, riskColor, action, screening;
+                    if (risk < 25) {
+                        riskLevelText = "VERY LOW";
+                        riskColor = "text-green-500";
+                        action = "Maintain";
+                        screening = "24 months";
+                    } else if (risk < 40) {
+                        riskLevelText = "LOW";
+                        riskColor = "text-green-400";
+                        action = "Monitor";
+                        screening = "12 months";
+                    } else if (risk < 60) {
+                        riskLevelText = "MODERATE";
+                        riskColor = "text-yellow-500";
+                        action = "Lifestyle Changes";
+                        screening = "6 months";
+                    } else if (risk < 75) {
+                        riskLevelText = "HIGH";
+                        riskColor = "text-orange-500";
+                        action = "Consult Physician";
+                        screening = "3 months";
+                    } else {
+                        riskLevelText = "VERY HIGH";
+                        riskColor = "text-red-500";
+                        action = "Immediate Action";
+                        screening = "1 month";
+                    }
+                    
+                    // Update result elements with animation
+                    riskLevel.textContent = riskLevelText;
+                    riskLevel.className = `text-2xl font-bold ${riskColor} animate-pulse`;
+                    setTimeout(() => riskLevel.classList.remove('animate-pulse'), 1000);
+                    
+                    recommendedAction.textContent = action;
+                    nextScreening.textContent = screening;
+                    
+                    // Hide loading indicator and show results with animation
+                    loadingIndicator.classList.add('hidden');
+                    predictionForm.classList.remove('opacity-30', 'pointer-events-none');
+                    predictionResult.classList.remove('hidden');
+                    predictionResult.style.opacity = '0';
+                    predictionResult.style.transform = 'translateY(20px)';
+                    
+                    setTimeout(() => {
+                        predictionResult.style.transition = 'opacity 0.5s, transform 0.5s';
+                        predictionResult.style.opacity = '1';
+                        predictionResult.style.transform = 'translateY(0)';
+                    }, 100);
+                    
+                    predictButton.disabled = false;
+                    
+                    // Scroll to results
+                    predictionResult.scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }, 300);
+            }, 3200); // Increased simulation time for better UX
+        });
+        
+        // Back to top button
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.remove('opacity-0', 'translate-y-10');
+                backToTopBtn.classList.add('opacity-100', 'translate-y-0');
+            } else {
+                backToTopBtn.classList.remove('opacity-100', 'translate-y-0');
+                backToTopBtn.classList.add('opacity-0', 'translate-y-10');
+            }
+        });
+        
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Add ripple effect
+            const ripple = document.createElement('div');
+            ripple.style.position = 'fixed';
+            ripple.style.width = '20px';
+            ripple.style.height = '20px';
+            ripple.style.borderRadius = '50%';
+            ripple.style.background = 'rgba(59, 130, 246, 0.5)';
+            ripple.style.zIndex = '9999';
+            ripple.style.top = '50%';
+            ripple.style.left = '50%';
+            ripple.style.transform = 'translate(-50%, -50%)';
+            ripple.style.animation = 'ripple 1s ease-out forwards';
+            
+            document.body.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 1000);
+        });
+        
+        // Chat Assistant button
+        chatAssistant.addEventListener('click', () => {
+            // Create chat modal
+            const chatModal = document.createElement('div');
+            chatModal.className = 'fixed bottom-24 left-8 w-80 h-96 bg-white rounded-2xl shadow-2xl z-50 border border-slate-200 overflow-hidden';
+            chatModal.innerHTML = `
+                <div class="bg-gradient-to-r from-purple-600 to-pink-500 p-4 text-white">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-robot"></i>
+                            <h3 class="font-bold">HealthPredict AI Assistant</h3>
+                        </div>
+                        <button id="closeChat" class="text-white hover:text-slate-200">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-4 h-64 overflow-y-auto bg-slate-50">
+                    <div class="mb-4">
+                        <div class="bg-slate-200 rounded-2xl p-3 max-w-xs">
+                            <p class="text-slate-800">Hello! I'm your AI healthcare assistant. How can I help you today?</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 border-t border-slate-200">
+                    <div class="flex gap-2">
+                        <input type="text" placeholder="Type your question..." class="flex-1 border border-slate-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <button class="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-full flex items-center justify-center">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(chatModal);
+            
+            // Add animation
+            chatModal.style.opacity = '0';
+            chatModal.style.transform = 'translateY(20px) scale(0.9)';
+            setTimeout(() => {
+                chatModal.style.transition = 'opacity 0.3s, transform 0.3s';
+                chatModal.style.opacity = '1';
+                chatModal.style.transform = 'translateY(0) scale(1)';
+            }, 10);
+            
+            // Close button functionality
+            chatModal.querySelector('#closeChat').addEventListener('click', () => {
+                chatModal.style.opacity = '0';
+                chatModal.style.transform = 'translateY(20px) scale(0.9)';
+                setTimeout(() => chatModal.remove(), 300);
+            });
+        });
+        
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fade-in-up');
+                    entry.target.style.opacity = '1';
+                }
+            });
+        }, observerOptions);
+        
+        // Observe elements for scroll animations
+        document.querySelectorAll('section, .card-glow, .hover-lift').forEach((el) => {
+            observer.observe(el);
+        });
+        
+        // Add hover sound effect simulation (visual only)
+        const interactiveElements = document.querySelectorAll('button, a, .group');
+        interactiveElements.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                el.classList.add('transition', 'duration-300');
+            });
+        });
+        
+        // Add keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const chatModal = document.querySelector('.fixed.bottom-24');
+                if (chatModal) {
+                    chatModal.remove();
+                }
+            }
+        });
+        
+        // Initialize with some animations
+        window.addEventListener('load', () => {
+            // Add floating animation to specific elements
+            document.querySelectorAll('.floating-element').forEach(el => {
+                el.style.animationDelay = `${Math.random() * 2}s`;
+            });
+            
+            // Add shimmer effect to loading areas
+            setTimeout(() => {
+                document.querySelectorAll('.animate-shimmer').forEach(el => {
+                    el.classList.add('animate-shimmer');
+                });
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

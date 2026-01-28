@@ -1,0 +1,11 @@
+age,gender,blood_pressure,cholesterol,glucose,disease_type
+45,Male,130/85,200,110,Diabetes
+52,Female,140/90,240,120,Heart Disease
+38,Male,120/80,180,95,Normal
+65,Male,160/100,280,140,Hypertension
+41,Female,125/85,210,105,Prediabetes
+58,Female,145/95,250,130,Heart Disease
+35,Male,115/75,170,85,Normal
+72,Male,170/105,290,150,Diabetes
+48,Female,135/90,220,115,Hypertension
+61,Male,155/100,260,135,Heart Disease

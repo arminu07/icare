@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Report - HealthPredict</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%);
+            min-height: 100vh;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 30px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="text-slate-900">
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 glass-card border-b border-slate-200/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-teal-500 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    </div>
+                    <a href="{% url 'home' %}" class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">HealthPredict</a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="{% url 'dashboard' %}" class="text-slate-600 hover:text-blue-600 transition">Back to Dashboard</a>
+                    {% if user.is_authenticated %}
+                        <span class="text-slate-700">{{ user.first_name|default:user.username }}</span>
+                        <a href="{% url 'logout' %}" class="text-slate-600 hover:text-red-600 transition">Logout</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Header -->
+        <div class="mb-12 animate-fade-in-up">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+                <i class="fas fa-file-medical text-blue-600 mr-3"></i>
+                Analysis Report
+            </h1>
+            <p class="text-lg text-slate-600">Detailed disease predictions and risk assessment</p>
+        </div>
+
+        <!-- Report Info -->
+        <div class="glass-card rounded-2xl shadow-xl p-8 mb-8 animate-fade-in-up" style="animation-delay: 0.1s">
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold text-slate-900 mb-4">Report Details</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <p class="text-sm text-slate-600">Report ID</p>
+                            <p class="font-mono text-slate-900">#{{ analysis.id }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-600">Analysis Date</p>
+                            <p class="text-slate-900">{{ analysis.created_at|date:"M d, Y H:i" }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-600">Patients Analyzed</p>
+                            <p class="text-slate-900">{{ analysis.total_patients }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-slate-900 mb-4">Patient Details</h3>
+                    <div class="space-y-3">
+                        {% if report.patient_name %}
+                        <div>
+                            <p class="text-sm text-slate-600">Patient Name</p>
+                            <p class="text-slate-900">{{ report.patient_name }}</p>
+                        </div>
+                        {% endif %}
+                        {% if report.details %}
+                        <div>
+                            <p class="text-sm text-slate-600">Additional Notes</p>
+                            <p class="text-slate-900 text-sm">{{ report.details|truncatewords:20 }}</p>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <p class="text-sm text-slate-600">Analyst</p>
+                            <p class="text-slate-900">{{ analysis.user.get_full_name|default:analysis.user.username }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Grid -->
+        <div class="grid md:grid-cols-3 gap-6 mb-12 animate-fade-in-up" style="animation-delay: 0.2s">
+            <div class="glass-card rounded-2xl shadow-xl p-6 text-center">
+                <div class="text-3xl font-bold text-blue-600 mb-2">{{ results.total_diseases }}</div>
+                <p class="text-slate-600 font-medium">Total Diseases Analyzed</p>
+            </div>
+            <div class="glass-card rounded-2xl shadow-xl p-6 text-center">
+                <div class="text-3xl font-bold text-orange-600 mb-2">{{ results.high_risk_count }}</div>
+                <p class="text-slate-600 font-medium">High Risk Diseases</p>
+            </div>
+            <div class="glass-card rounded-2xl shadow-xl p-6 text-center">
+                <div class="text-3xl font-bold text-green-600 mb-2">{{ results.avg_confidence }}%</div>
+                <p class="text-slate-600 font-medium">Average Confidence</p>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid md:grid-cols-2 gap-8 mb-12 animate-fade-in-up" style="animation-delay: 0.3s">
+            <!-- Disease Predictions Chart -->
+            <div class="glass-card rounded-2xl shadow-xl p-8">
+                <h3 class="text-xl font-bold text-slate-900 mb-6">
+                    <i class="fas fa-disease text-red-500 mr-2"></i>
+                    Disease Risk Predictions
+                </h3>
+                <div class="chart-container">
+                    <canvas id="diseasePredictionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Risk Level Chart -->
+            <div class="glass-card rounded-2xl shadow-xl p-8">
+                <h3 class="text-xl font-bold text-slate-900 mb-6">
+                    <i class="fas fa-exclamation-triangle text-orange-500 mr-2"></i>
+                    Risk Level Distribution
+                </h3>
+                <div class="chart-container">
+                    <canvas id="riskLevelChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Results Table -->
+        <div class="glass-card rounded-2xl shadow-xl p-8 mb-8 animate-fade-in-up" style="animation-delay: 0.4s">
+            <h3 class="text-xl font-bold text-slate-900 mb-6">
+                <i class="fas fa-table text-blue-600 mr-2"></i>
+                Detailed Disease Predictions
+            </h3>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-slate-200">
+                            <th class="px-4 py-3 text-left font-semibold text-slate-900">Disease</th>
+                            <th class="px-4 py-3 text-left font-semibold text-slate-900">Confidence</th>
+                            <th class="px-4 py-3 text-left font-semibold text-slate-900">Risk Level</th>
+                            <th class="px-4 py-3 text-left font-semibold text-slate-900">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTableBody">
+                        {% for disease, confidence, risk in results.predictions %}
+                        <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
+                            <td class="px-4 py-4 text-slate-900">{{ disease }}</td>
+                            <td class="px-4 py-4">
+                                <div class="w-32 bg-slate-200 rounded-full h-2">
+                                    <div class="bg-gradient-to-r from-blue-600 to-teal-500 h-2 rounded-full" style="width: {{ confidence }}%"></div>
+                                </div>
+                                <span class="text-sm text-slate-600">{{ confidence }}%</span>
+                            </td>
+                            <td class="px-4 py-4">
+                                {% if risk == 'High' %}
+                                    <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">High</span>
+                                {% elif risk == 'Medium' %}
+                                    <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">Medium</span>
+                                {% else %}
+                                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Low</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-4">
+                                {% if confidence > 70 %}
+                                    <span class="text-red-600 font-medium">⚠️ Alert</span>
+                                {% else %}
+                                    <span class="text-green-600 font-medium">✓ Normal</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Risk Breakdown -->
+        <div class="grid md:grid-cols-3 gap-6 mb-8 animate-fade-in-up" style="animation-delay: 0.5s">
+            <div class="glass-card rounded-2xl shadow-xl p-6">
+                <h4 class="font-semibold text-red-700 mb-4">
+                    <i class="fas fa-triangle-exclamation mr-2"></i>
+                    High Risk Diseases
+                </h4>
+                <ul class="space-y-2">
+                    {% for pred in results.full_predictions %}
+                        {% if pred.risk == 'High' %}
+                        <li class="flex justify-between items-center">
+                            <span class="text-slate-700">{{ pred.disease }}</span>
+                            <span class="font-bold text-red-600">{{ pred.confidence }}%</span>
+                        </li>
+                        {% endif %}
+                    {% empty %}
+                    <li class="text-slate-500 text-sm">No high-risk diseases detected</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="glass-card rounded-2xl shadow-xl p-6">
+                <h4 class="font-semibold text-yellow-700 mb-4">
+                    <i class="fas fa-circle-exclamation mr-2"></i>
+                    Medium Risk Diseases
+                </h4>
+                <ul class="space-y-2">
+                    {% for pred in results.full_predictions %}
+                        {% if pred.risk == 'Medium' %}
+                        <li class="flex justify-between items-center">
+                            <span class="text-slate-700">{{ pred.disease }}</span>
+                            <span class="font-bold text-yellow-600">{{ pred.confidence }}%</span>
+                        </li>
+                        {% endif %}
+                    {% empty %}
+                    <li class="text-slate-500 text-sm">No medium-risk diseases detected</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="glass-card rounded-2xl shadow-xl p-6">
+                <h4 class="font-semibold text-green-700 mb-4">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    Low Risk Diseases
+                </h4>
+                <ul class="space-y-2">
+                    {% for pred in results.full_predictions %}
+                        {% if pred.risk == 'Low' %}
+                        <li class="flex justify-between items-center">
+                            <span class="text-slate-700">{{ pred.disease }}</span>
+                            <span class="font-bold text-green-600">{{ pred.confidence }}%</span>
+                        </li>
+                        {% endif %}
+                    {% empty %}
+                    <li class="text-slate-500 text-sm">No low-risk diseases detected</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-4 justify-center mb-8 animate-fade-in-up" style="animation-delay: 0.6s">
+            <button onclick="window.print()" class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-teal-500 text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition">
+                <i class="fas fa-print"></i>
+                Print Report
+            </button>
+            <button onclick="downloadResults()" class="flex items-center gap-2 border border-blue-600 text-blue-600 px-8 py-3 rounded-xl font-semibold hover:bg-blue-50 transition">
+                <i class="fas fa-download"></i>
+                Download Results
+            </button>
+            <a href="{% url 'delete_analysis' analysis.id %}" class="flex items-center gap-2 border border-red-600 text-red-600 px-8 py-3 rounded-xl font-semibold hover:bg-red-50 transition" onclick="return confirm('Are you sure you want to delete this analysis?');">
+                <i class="fas fa-trash"></i>
+                Delete Report
+            </a>
+        </div>
+    </main>
+
+    <script>
+        // Disease Prediction Chart
+        const diseasePredictionCtx = document.getElementById('diseasePredictionChart');
+        if (diseasePredictionCtx) {
+            new Chart(diseasePredictionCtx, {
+                type: 'bar',
+                data: {
+                    labels: {{ results.disease_names|safe }},
+                    datasets: [{
+                        label: 'Prediction Confidence (%)',
+                        data: {{ results.disease_confidences|safe }},
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(6, 182, 212, 0.8)',
+                            'rgba(239, 68, 68, 0.8)',
+                            'rgba(251, 146, 60, 0.8)',
+                            'rgba(34, 197, 94, 0.8)',
+                        ],
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, max: 100 }
+                    }
+                }
+            });
+        }
+
+        // Risk Level Chart
+        const riskLevelCtx = document.getElementById('riskLevelChart');
+        if (riskLevelCtx) {
+            new Chart(riskLevelCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['High Risk', 'Medium Risk', 'Low Risk'],
+                    datasets: [{
+                        data: [{{ results.high_risk_count }}, {{ results.medium_risk_count }}, {{ results.low_risk_count }}],
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.8)',
+                            'rgba(251, 146, 60, 0.8)',
+                            'rgba(34, 197, 94, 0.8)',
+                        ],
+                        borderColor: 'white',
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        function downloadResults() {
+            const element = document.createElement('a');
+            element.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(generateCSV());
+            element.setAttribute('download', `health_analysis_{{ analysis.id }}.csv`);
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
+        function generateCSV() {
+            let csv = 'Disease,Confidence(%),Risk Level\n';
+            document.querySelectorAll('#resultsTableBody tr').forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const disease = cells[0].textContent;
+                const confidence = cells[1].textContent.split('\n')[1].trim();
+                const risk = cells[2].textContent.trim();
+                csv += `${disease},${confidence},${risk}\n`;
+            });
+            return csv;
+        }
+    </script>
+</body>
+</html>

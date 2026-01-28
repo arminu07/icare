@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthPredict | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%);
+            min-height: 100vh;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .upload-drop-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-drop-zone:hover {
+            border-color: #3b82f6;
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+
+        .upload-drop-zone.dragover {
+            border-color: #06b6d4;
+            background-color: rgba(6, 182, 212, 0.1);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 30px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="text-slate-900">
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 glass-card border-b border-slate-200/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-teal-500 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    </div>
+                    <a href="{% url 'home' %}" class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">HealthPredict</a>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="{% url 'home' %}" class="text-slate-600 hover:text-blue-600 transition duration-300">Home</a>
+                    <a href="#" class="text-slate-600 hover:text-blue-600 transition duration-300">Features</a>
+                    <a href="#" class="text-slate-600 hover:text-blue-600 transition duration-300">About</a>
+                </div>
+                <div class="flex items-center gap-4">
+                    {% if user.is_authenticated %}
+                        <span class="text-slate-700">Welcome, {{ user.first_name|default:user.username }}</span>
+                        <a href="{% url 'logout' %}" class="text-slate-600 hover:text-red-600 transition">Logout</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="text-blue-600 font-medium hover:text-blue-700">Login</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Header -->
+        <div class="mb-12 animate-fade-in-up">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+                <i class="fas fa-chart-line text-blue-600 mr-3"></i>
+                Healthcare Analytics Dashboard
+            </h1>
+            <p class="text-xl text-slate-600">Upload medical CSV reports and get instant disease predictions with visual analytics</p>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="grid md:grid-cols-3 gap-8 mb-12">
+            <div class="md:col-span-2">
+                <div class="glass-card rounded-2xl shadow-xl p-8 animate-fade-in-up" style="animation-delay: 0.1s">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-6">
+                        <i class="fas fa-cloud-upload-alt text-blue-600 mr-2"></i>
+                        Upload Medical Report
+                    </h2>
+                    
+                    <!-- Error Display -->
+                    {% if error %}
+                    <div class="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 mb-6">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-exclamation-circle text-xl"></i>
+                            <div>
+                                <div class="font-bold">Error</div>
+                                <div class="text-sm">{{ error }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Success Display -->
+                    {% if success %}
+                    <div class="p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 mb-6">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-check-circle text-xl"></i>
+                            <div>
+                                <div class="font-bold">Success</div>
+                                <div class="text-sm">{{ success }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Upload Form -->
+                   <form id="uploadForm" method="POST" enctype="multipart/form-data" class="space-y-6">
+                        {% csrf_token %}
+                        
+                        <!-- File Input -->
+                        <div>
+                            <label class="block text-slate-700 font-medium mb-3">Select CSV File</label>
+                            <div class="upload-drop-zone" id="dropZone">
+                                <div class="mb-4">
+                                    <i class="fas fa-file-csv text-4xl text-blue-600 mb-4"></i>
+                                </div>
+                                <p class="text-lg font-medium text-slate-700 mb-2">Drag and drop your CSV file here</p>
+                                <p class="text-sm text-slate-500 mb-4">or click to browse</p>
+                                <input type="file" id="csvFile" name="csv_file" accept=".csv" class="hidden" required>
+                                <button type="button" id="browseButton" class="text-blue-600 font-medium hover:text-blue-700">Browse Files</button>
+                            </div>
+                            <p id="fileName" class="text-sm text-slate-500 mt-3"></p>
+                        </div>
+
+                        <!-- Patient Name Input -->
+                        <div>
+                            <label for="patient_name" class="block text-slate-700 font-medium mb-3">Patient Name (Optional)</label>
+                            <input type="text" id="patient_name" name="patient_name" placeholder="Enter patient name..." class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+                        </div>
+
+                        <!-- Details Input -->
+                        <div>
+                            <label for="details" class="block text-slate-700 font-medium mb-3">Patient Details (Optional)</label>
+                            <textarea id="details" name="details" rows="4" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" placeholder="Enter additional patient information..."></textarea>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="flex gap-4">
+                            <button type="submit" class="flex-1 bg-gradient-to-r from-blue-600 to-teal-500 text-white font-semibold py-3 rounded-xl hover:shadow-lg transition duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-2">
+                                <i class="fas fa-upload"></i>
+                                <span>Analyze Report</span>
+                            </button>
+                            <button type="reset" class="px-6 py-3 border border-slate-300 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition duration-300">
+                                Reset
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- File Format Info -->
+                    <div class="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                        <h4 class="font-semibold text-blue-900 mb-2">
+                            <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+                            CSV Format Requirements
+                        </h4>
+                        <ul class="text-sm text-blue-800 space-y-1">
+                            <li>• Columns: age, gender, blood_pressure, cholesterol, glucose, disease_type</li>
+                            <li>• Example: 45, Male, 130/85, 200, 110, Diabetes</li>
+                            <li>• File size: Maximum 10MB</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Info Card -->
+            <div class="glass-card rounded-2xl shadow-xl p-8 animate-fade-in-up" style="animation-delay: 0.2s">
+                <h3 class="text-xl font-bold text-slate-900 mb-6">
+                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                    How It Works
+                </h3>
+                <div class="space-y-4">
+                    <div class="flex gap-3">
+                        <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">1</div>
+                        <div>
+                            <p class="font-semibold text-slate-900">Upload CSV</p>
+                            <p class="text-sm text-slate-600">Select your medical data file</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">2</div>
+                        <div>
+                            <p class="font-semibold text-slate-900">AI Analysis</p>
+                            <p class="text-sm text-slate-600">Our ML models process the data</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">3</div>
+                        <div>
+                            <p class="font-semibold text-slate-900">Get Results</p>
+                            <p class="text-sm text-slate-600">View predictions and graphs</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="mt-8 pt-8 border-t border-slate-200 space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-slate-600">Accuracy</span>
+                        <span class="font-bold text-slate-900">98.7%</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-600">Diseases</span>
+                        <span class="font-bold text-slate-900">15+</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-600">Processing</span>
+                        <span class="font-bold text-slate-900">&lt; 5s</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section (Shown after upload) -->
+        {% if results %}
+        <div class="animate-fade-in-up" style="animation-delay: 0.3s">
+            <h2 class="text-3xl font-bold text-slate-900 mb-8">
+                <i class="fas fa-chart-bar text-green-600 mr-3"></i>
+                Analysis Results
+            </h2>
+
+            <!-- Results Grid -->
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <!-- Disease Predictions Chart -->
+                <div class="glass-card rounded-2xl shadow-xl p-8">
+                    <h3 class="text-xl font-bold text-slate-900 mb-6">
+                        <i class="fas fa-disease text-red-500 mr-2"></i>
+                        Disease Risk Predictions
+                    </h3>
+                    <div class="chart-container">
+                        <canvas id="diseasePredictionChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Risk Level Chart -->
+                <div class="glass-card rounded-2xl shadow-xl p-8">
+                    <h3 class="text-xl font-bold text-slate-900 mb-6">
+                        <i class="fas fa-exclamation-triangle text-orange-500 mr-2"></i>
+                        Risk Level Distribution
+                    </h3>
+                    <div class="chart-container">
+                        <canvas id="riskLevelChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Results Table -->
+            <div class="glass-card rounded-2xl shadow-xl p-8 mb-8">
+                <h3 class="text-xl font-bold text-slate-900 mb-6">
+                    <i class="fas fa-table text-blue-600 mr-2"></i>
+                    Detailed Predictions
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-slate-200">
+                                <th class="px-4 py-3 text-left font-semibold text-slate-900">Disease</th>
+                                <th class="px-4 py-3 text-left font-semibold text-slate-900">Confidence</th>
+                                <th class="px-4 py-3 text-left font-semibold text-slate-900">Risk Level</th>
+                                <th class="px-4 py-3 text-left font-semibold text-slate-900">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTableBody">
+                            {% for disease, confidence, risk in results.predictions %}
+                            <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
+                                <td class="px-4 py-4 text-slate-900">{{ disease }}</td>
+                                <td class="px-4 py-4">
+                                    <div class="w-32 bg-slate-200 rounded-full h-2">
+                                        <div class="bg-gradient-to-r from-blue-600 to-teal-500 h-2 rounded-full" style="width: {{ confidence }}%"></div>
+                                    </div>
+                                    <span class="text-sm text-slate-600">{{ confidence }}%</span>
+                                </td>
+                                <td class="px-4 py-4">
+                                    {% if risk == 'High' %}
+                                        <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">High</span>
+                                    {% elif risk == 'Medium' %}
+                                        <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">Medium</span>
+                                    {% else %}
+                                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Low</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-4">
+                                    {% if confidence > 70 %}
+                                        <span class="text-red-600 font-medium">⚠️ Alert</span>
+                                    {% else %}
+                                        <span class="text-green-600 font-medium">✓ Normal</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Summary Statistics -->
+            <div class="grid md:grid-cols-3 gap-6 mb-8">
+                <div class="glass-card rounded-2xl shadow-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-blue-600 mb-2">{{ results.total_diseases }}</div>
+                    <p class="text-slate-600 font-medium">Total Diseases Analyzed</p>
+                </div>
+                <div class="glass-card rounded-2xl shadow-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-orange-600 mb-2">{{ results.high_risk_count }}</div>
+                    <p class="text-slate-600 font-medium">High Risk Diseases</p>
+                </div>
+                <div class="glass-card rounded-2xl shadow-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-green-600 mb-2">{{ results.avg_confidence }}%</div>
+                    <p class="text-slate-600 font-medium">Average Confidence</p>
+                </div>
+            </div>
+
+            <!-- Export and Actions -->
+            <div class="flex gap-4 justify-center">
+                <button onclick="window.print()" class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-teal-500 text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition">
+                    <i class="fas fa-print"></i>
+                    Print Report
+                </button>
+                <button onclick="downloadResults()" class="flex items-center gap-2 border border-blue-600 text-blue-600 px-8 py-3 rounded-xl font-semibold hover:bg-blue-50 transition">
+                    <i class="fas fa-download"></i>
+                    Download Results
+                </button>
+            </div>
+        </div>
+        {% endif %}
+    </main>
+
+    <script>
+        console.log('✓ Dashboard script loaded');
+        
+        // File upload handling
+        const dropZone = document.getElementById('dropZone');
+        const csvFile = document.getElementById('csvFile');
+        const fileName = document.getElementById('fileName');
+        const browseButton = document.getElementById('browseButton');
+        const uploadForm = document.getElementById('uploadForm');
+
+        console.log('Elements:', { dropZone, csvFile, fileName, browseButton, uploadForm });
+
+        // Click handlers for file selection
+        dropZone.addEventListener('click', () => {
+            console.log('Drop zone clicked - triggering file input');
+            csvFile.click();
+        });
+        
+        browseButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Browse button clicked - triggering file input');
+            csvFile.click();
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            console.log('File dragging over drop zone');
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            console.log('File left drop zone');
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            console.log('Files dropped on zone');
+            dropZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            console.log('Dropped files:', files);
+            
+            if (files.length > 0) {
+                const file = files[0];
+                console.log('File selected:', { name: file.name, size: file.size, type: file.type });
+                
+                // Validate file
+                if (!file.name.endsWith('.csv')) {
+                    console.error('❌ Invalid file type:', file.type);
+                    alert('Please select a CSV file');
+                    return;
+                }
+                
+                if (file.size > 10 * 1024 * 1024) {
+                    console.error('❌ File too large:', file.size, 'bytes');
+                    alert('File size exceeds 10MB limit');
+                    return;
+                }
+                
+                try {
+                    // Use DataTransfer to set files
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    csvFile.files = dt.files;
+                    console.log('✓ File set in input:', csvFile.files[0].name);
+                    fileName.textContent = `Selected: ${file.name}`;
+                } catch (error) {
+                    console.error('❌ Error setting file:', error);
+                }
+            }
+        });
+
+        csvFile.addEventListener('change', (e) => {
+            console.log('File input changed');
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                console.log('File selected via input:', { name: file.name, size: file.size });
+                fileName.textContent = `Selected: ${file.name}`;
+            }
+        });
+
+        // Form submission with error handling
+        if (uploadForm) {
+            uploadForm.addEventListener('submit', (e) => {
+                console.log('Form submission started');
+                
+                if (!csvFile.files || csvFile.files.length === 0) {
+                    e.preventDefault();
+                    console.error('❌ No file selected');
+                    alert('Please select a CSV file');
+                    return;
+                }
+                
+                const file = csvFile.files[0];
+                console.log('Submitting file:', { name: file.name, size: file.size });
+                
+                // Log form data
+                const formData = new FormData(uploadForm);
+                console.log('Form data:', {
+                    patient_name: formData.get('patient_name'),
+                    details: formData.get('details'),
+                    csv_file: formData.get('csv_file')?.name
+                });
+                
+                console.log('✓ Form submitted successfully');
+            });
+        } else {
+            console.warn('⚠️ Upload form not found');
+        }
+
+
+        // Chart rendering
+        const diseasePredictionCtx = document.getElementById('diseasePredictionChart');
+        const riskLevelCtx = document.getElementById('riskLevelChart');
+
+        if (diseasePredictionCtx) {
+            new Chart(diseasePredictionCtx, {
+                type: 'bar',
+                data: {
+                    labels: {{ results.disease_names|safe }},
+                    datasets: [{
+                        label: 'Prediction Confidence (%)',
+                        data: {{ results.disease_confidences|safe }},
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(6, 182, 212, 0.8)',
+                            'rgba(239, 68, 68, 0.8)',
+                            'rgba(251, 146, 60, 0.8)',
+                            'rgba(34, 197, 94, 0.8)',
+                        ],
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, max: 100 }
+                    }
+                }
+            });
+        }
+
+        if (riskLevelCtx) {
+            new Chart(riskLevelCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['High Risk', 'Medium Risk', 'Low Risk'],
+                    datasets: [{
+                        data: [{{ results.high_risk_count }}, {{ results.medium_risk_count }}, {{ results.low_risk_count }}],
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.8)',
+                            'rgba(251, 146, 60, 0.8)',
+                            'rgba(34, 197, 94, 0.8)',
+                        ],
+                        borderColor: 'white',
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        function downloadResults() {
+            const element = document.createElement('a');
+            element.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(generateCSV());
+            element.setAttribute('download', 'health_predictions.csv');
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
+        function generateCSV() {
+            let csv = 'Disease,Confidence(%),Risk Level\n';
+            document.querySelectorAll('#resultsTableBody tr').forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const disease = cells[0].textContent;
+                const confidence = cells[1].textContent.split('\n')[1].trim();
+                const risk = cells[2].textContent.trim();
+                csv += `${disease},${confidence},${risk}\n`;
+            });
+            return csv;
+        }
+    </script>
+</body>
+</html>

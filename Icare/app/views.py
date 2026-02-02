@@ -3,6 +3,7 @@ from.models import *
 import logging
 from django.contrib.auth import login,logout,authenticate
 import csv
+import json
 from django.contrib.auth.decorators import login_required
 from .disease_predictor import predict_from_csv
 import io
@@ -122,109 +123,123 @@ def logout_view(request):
 @login_required(login_url='login')
 def dashboard(request):
     """Dashboard view for uploading CSV reports and viewing disease predictions"""
-    context = {}
+    context = {
+        'upload_status': None,
+        'upload_progress': None,
+    }
     
     # Load analysis results history
-    analysis_history = AnalysisResult.objects.filter(user=request.user)
-    context['analysis_history'] = analysis_history[:5]  # Last 5 analyses
+    recent_analyses = AnalysisResult.objects.filter(user=request.user).order_by('-created_at')[:3]
+    context['recent_analyses'] = recent_analyses
     
     if request.method == 'POST':
         try:
             # Get the uploaded file
             csv_file = request.FILES.get('csv_file')
-            details = request.POST.get('details', '')
+            patient_name = request.POST.get('patient_name', '').strip()
+            report_type = request.POST.get('report_type', 'general')
+            details = request.POST.get('details', '').strip()
             
-            logger.info(f"[UPLOAD] User {request.user.email} attempting upload. Files: {list(request.FILES.keys())}")
+            logger.info(f"[CSV_UPLOAD] User {request.user.email} initiated upload. Files: {list(request.FILES.keys())}")
             
+            # ============ FILE VALIDATION ============
             if not csv_file:
-                error_msg = 'Please select a CSV file to upload.'
-                logger.warning(f"[UPLOAD ERROR] No file provided for user {request.user.email}")
-                context['error'] = error_msg
+                context['error'] = 'Please select a CSV file to upload.'
+                logger.warning(f"[CSV_UPLOAD] No file provided by {request.user.email}")
                 return render(request, 'dashboard.html', context)
             
-            logger.info(f"[UPLOAD] File received: {csv_file.name} ({csv_file.size} bytes)")
+            logger.info(f"[CSV_UPLOAD] File received: {csv_file.name} ({csv_file.size} bytes)")
             
-            # Validate file
-            if not csv_file.name.endswith('.csv'):
-                error_msg = 'File must be in CSV format.'
-                logger.warning(f"[UPLOAD ERROR] Invalid file type: {csv_file.name}")
-                context['error'] = error_msg
+            # Validate file extension
+            if not csv_file.name.lower().endswith('.csv'):
+                context['error'] = 'Invalid file format. Please upload a CSV file.'
+                logger.warning(f"[CSV_UPLOAD] Invalid file type: {csv_file.name}")
                 return render(request, 'dashboard.html', context)
             
-            # Check file size (10MB limit)
-            if csv_file.size > 10 * 1024 * 1024:
-                error_msg = 'File size exceeds 10MB limit.'
-                logger.warning(f"[UPLOAD ERROR] File too large: {csv_file.size} bytes")
-                context['error'] = error_msg
+            # Validate file size (10MB limit)
+            max_size = 10 * 1024 * 1024
+            if csv_file.size > max_size:
+                context['error'] = f'File size exceeds 10MB limit. Your file is {csv_file.size / 1024 / 1024:.2f}MB.'
+                logger.warning(f"[CSV_UPLOAD] File too large: {csv_file.size} bytes")
                 return render(request, 'dashboard.html', context)
             
+            # ============ CSV PARSING ============
             try:
-                # Parse CSV file into list of dictionaries
-                logger.info(f"[UPLOAD] Parsing CSV file...")
+                logger.info(f"[CSV_UPLOAD] Parsing CSV file...")
+                csv_file.seek(0)  # Reset file pointer
                 decoded_file = csv_file.read().decode('utf-8').splitlines()
                 csv_reader = csv.DictReader(decoded_file)
                 medical_data = list(csv_reader)
-                logger.info(f"[UPLOAD] ✓ Parsed {len(medical_data)} records")
                 
                 if not medical_data:
-                    error_msg = 'CSV file is empty. Please provide medical records.'
-                    logger.warning(f"[UPLOAD ERROR] Empty CSV file")
-                    context['error'] = error_msg
+                    context['error'] = 'CSV file is empty. Please provide at least one medical record.'
+                    logger.warning(f"[CSV_UPLOAD] Empty CSV file uploaded by {request.user.email}")
                     return render(request, 'dashboard.html', context)
                 
-                # Log column headers
-                if medical_data:
-                    logger.info(f"[UPLOAD] CSV columns: {list(medical_data[0].keys())}")
-                    logger.info(f"[UPLOAD] First record: {medical_data[0]}")
+                # Validate required columns
+                required_columns = {'age', 'gender', 'blood_pressure', 'cholesterol', 'glucose'}
+                csv_columns = set(medical_data[0].keys()) if medical_data else set()
+                missing_columns = required_columns - csv_columns
                 
+                if missing_columns:
+                    context['error'] = f'CSV missing required columns: {", ".join(sorted(missing_columns))}'
+                    logger.warning(f"[CSV_UPLOAD] Missing columns: {missing_columns}")
+                    return render(request, 'dashboard.html', context)
+                
+                logger.info(f"[CSV_UPLOAD] ✓ Successfully parsed {len(medical_data)} records")
+                logger.info(f"[CSV_UPLOAD] CSV columns: {list(medical_data[0].keys())}")
+                
+            except UnicodeDecodeError:
+                context['error'] = 'CSV file encoding error. Please use UTF-8 encoding.'
+                logger.error(f"[CSV_UPLOAD] Unicode decode error: {csv_file.name}")
+                return render(request, 'dashboard.html', context)
             except Exception as e:
-                error_msg = f'Error parsing CSV: {str(e)}'
-                logger.error(f"[UPLOAD ERROR] CSV parsing failed: {str(e)}", exc_info=True)
-                context['error'] = error_msg
+                context['error'] = f'Error parsing CSV file: {str(e)}'
+                logger.error(f"[CSV_UPLOAD] CSV parsing failed: {str(e)}", exc_info=True)
                 return render(request, 'dashboard.html', context)
             
-            logger.info(f"[UPLOAD] Processing {len(medical_data)} medical records for user {request.user.email}")
-            
+            # ============ DATABASE STORAGE ============
             try:
-                # Save medical report to database
-                logger.info(f"[UPLOAD] Creating MedicalReport...")
+                logger.info(f"[CSV_UPLOAD] Creating MedicalReport...")
+                # Reset file pointer before saving
+                csv_file.seek(0)
+                
+                # Generate default patient name if not provided
+                if not patient_name:
+                    patient_name = f'Patient {datetime.now().strftime("%Y%m%d%H%M%S")}'
+                
                 medical_report = MedicalReport.objects.create(
                     user=request.user,
-                    patient_name=request.POST.get('patient_name', f'Patient {datetime.now().strftime("%Y%m%d%H%M%S")}'),
-                    details=details
+                    patient_name=patient_name,
+                    details=details,
+                    csv_file=csv_file
                 )
-                
-                # Save the uploaded CSV file
-                medical_report.csv_file = csv_file
-                medical_report.save()
-                logger.info(f"[UPLOAD] ✓ Medical report saved with ID: {medical_report.id}")
+                logger.info(f"[CSV_UPLOAD] ✓ Medical report created with ID: {medical_report.id}")
                 
             except Exception as e:
-                error_msg = f'Error saving report: {str(e)}'
-                logger.error(f"[UPLOAD ERROR] Failed to save MedicalReport: {str(e)}", exc_info=True)
-                context['error'] = error_msg
+                context['error'] = f'Error saving medical report: {str(e)}'
+                logger.error(f"[CSV_UPLOAD] Failed to save MedicalReport: {str(e)}", exc_info=True)
                 return render(request, 'dashboard.html', context)
             
+            # ============ DISEASE PREDICTION ============
             try:
-                # Use rule-based disease prediction
-                logger.info(f"[UPLOAD] Starting disease prediction...")
+                logger.info(f"[CSV_UPLOAD] Starting disease prediction for {len(medical_data)} records...")
                 prediction_results = predict_from_csv(medical_data)
-                logger.info(f"[UPLOAD] ✓ Prediction complete: {prediction_results['total_diseases']} diseases")
+                logger.info(f"[CSV_UPLOAD] ✓ Prediction complete. Total diseases analyzed: {prediction_results['total_diseases']}")
                 
             except Exception as e:
-                error_msg = f'Error in prediction: {str(e)}'
-                logger.error(f"[UPLOAD ERROR] Disease prediction failed: {str(e)}", exc_info=True)
-                context['error'] = error_msg
+                context['error'] = f'Error during disease prediction: {str(e)}'
+                logger.error(f"[CSV_UPLOAD] Disease prediction failed: {str(e)}", exc_info=True)
                 return render(request, 'dashboard.html', context)
             
+            # ============ RESULT FORMATTING & STORAGE ============
             try:
-                # Format results for template
-                formatted_predictions = prediction_results['predictions'][:15]  # Top 15 diseases
-                disease_names = [p['disease'] for p in formatted_predictions]
-                disease_confidences = [p['confidence'] for p in formatted_predictions]
+                # Format top 15 predictions
+                formatted_predictions = prediction_results['predictions'][:15]
+                disease_names = [str(p['disease']) for p in formatted_predictions]
+                disease_confidences = [float(p['confidence']) for p in formatted_predictions]
                 
-                # Save analysis results to database
-                logger.info(f"[UPLOAD] Creating AnalysisResult...")
+                logger.info(f"[CSV_UPLOAD] Saving analysis results to database...")
                 analysis_result = AnalysisResult.objects.create(
                     medical_report=medical_report,
                     user=request.user,
@@ -234,15 +249,16 @@ def dashboard(request):
                     medium_risk_count=prediction_results['medium_risk_count'],
                     low_risk_count=prediction_results['low_risk_count'],
                     average_confidence=prediction_results['avg_confidence'],
-                    predictions_json=prediction_results  # Store entire results as JSON
+                    predictions_json=prediction_results
                 )
-                logger.info(f"[UPLOAD] ✓ Analysis result saved with ID: {analysis_result.id}")
+                logger.info(f"[CSV_UPLOAD] ✓ Analysis result saved with ID: {analysis_result.id}")
                 
+                # Prepare context for template
                 context['results'] = {
                     'analysis_id': analysis_result.id,
-                    'predictions': [(p['disease'], p['confidence'], p['risk']) for p in formatted_predictions],
-                    'disease_names': disease_names,
-                    'disease_confidences': disease_confidences,
+                    'predictions': [(str(p['disease']), int(p['confidence']), str(p['risk'])) for p in formatted_predictions],
+                    'disease_names': json.dumps(disease_names),
+                    'disease_confidences': json.dumps(disease_confidences),
                     'total_diseases': prediction_results['total_diseases'],
                     'high_risk_count': prediction_results['high_risk_count'],
                     'medium_risk_count': prediction_results['medium_risk_count'],
@@ -251,21 +267,17 @@ def dashboard(request):
                     'full_predictions': formatted_predictions,
                 }
                 
-                success_msg = f'Successfully analyzed {len(medical_data)} patient records using AI models!'
-                context['success'] = success_msg
-                logger.info(f"[UPLOAD] ✓✓✓ SUCCESS: CSV uploaded and analyzed by {request.user.email}")
+                context['success'] = f'✓ Successfully analyzed {len(medical_data)} patient records!'
+                logger.info(f"[CSV_UPLOAD] ✓✓✓ UPLOAD COMPLETE by {request.user.email}")
                 
             except Exception as e:
-                error_msg = f'Error saving results: {str(e)}'
-                logger.error(f"[UPLOAD ERROR] Failed to save AnalysisResult: {str(e)}", exc_info=True)
-                context['error'] = error_msg
+                context['error'] = f'Error saving analysis results: {str(e)}'
+                logger.error(f"[CSV_UPLOAD] Failed to save AnalysisResult: {str(e)}", exc_info=True)
                 return render(request, 'dashboard.html', context)
-            
+        
         except Exception as e:
-            error_msg = f'Error processing file: {str(e)}'
-            context['error'] = error_msg
-            logger.error(f"[UPLOAD ERROR] Unexpected error: {str(e)}", exc_info=True)
-
+            context['error'] = f'An unexpected error occurred: {str(e)}'
+            logger.error(f"[CSV_UPLOAD] Unexpected error: {str(e)}", exc_info=True)
     
     return render(request, 'dashboard.html', context)
 

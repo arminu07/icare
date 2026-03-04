@@ -1,12 +1,14 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HealthPredict | Sign Up</title>
+    <title>ICARE | Sign Up</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="{% static 'js/theme.js' %}"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -14,6 +16,50 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f1f5f9;
+        }
+
+        body.dark-mode .glass-card {
+            background: rgba(30, 41, 59, 0.95);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-mode .text-slate-600 {
+            color: #cbd5e1;
+        }
+
+        body.dark-mode input {
+            background-color: rgba(15, 23, 42, 0.7);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: #f1f5f9;
+        }
+
+        .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #374151;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        body.dark-mode .theme-toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #cbd5e1;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.3);
         }
         
         /* Custom animations */
@@ -123,15 +169,19 @@
                     <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-teal-500 rounded-xl flex items-center justify-center">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                     </div>
-                    <a href="{% url 'home' %}" class="text-2xl font-bold gradient-text">HealthPredict</a>
+                    <a href="{% url 'home' %}" class="text-2xl font-bold gradient-text">ICARE</a>
                 </div>
                 <div class="hidden md:flex space-x-8">
-                    <a href="{% url 'home' %}" class="text-slate-600 hover:text-blue-600 transition duration-300 hover:scale-105">Home</a>
-                    <a href="#features" class="text-slate-600 hover:text-blue-600 transition duration-300 hover:scale-105">Features</a>
-                    <a href="#demo" class="text-slate-600 hover:text-blue-600 transition duration-300 hover:scale-105">Demo</a>
+                    <a href="{% url 'home' %}" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300 hover:scale-105">Home</a>
+                    <a href="#features" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300 hover:scale-105">Features</a>
+                    <a href="#demo" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300 hover:scale-105">Demo</a>
                 </div>
                 <div class="flex items-center gap-4">
-                    <a href="{% url 'login' %}" class="text-blue-600 font-medium hover:text-blue-700 transition duration-300">Login</a>
+                    <button class="theme-toggle-btn hidden md:inline-flex" onclick="toggleTheme()">
+                        <i class="fas fa-moon text-slate-600 dark:text-slate-300"></i>
+                        <span class="hidden md:inline text-slate-600 dark:text-slate-300 ml-2">Dark</span>
+                    </button>
+                    <a href="{% url 'login' %}" class="text-slate-600 dark:text-slate-300 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">Login</a>
                     <a href="{% url 'signup' %}" class="bg-gradient-to-r from-blue-600 to-teal-500 text-white px-6 py-3 rounded-full font-medium hover:shadow-lg hover:shadow-blue-200 transition duration-300 transform hover:-translate-y-1">Get Started</a>
                 </div>
             </div>
@@ -274,13 +324,13 @@
                                 <div class="flex items-start">
                                     <input type="checkbox" id="terms" name="terms" class="mt-1 w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" required>
                                     <label for="terms" class="ml-2 text-sm text-slate-600">
-                                        I agree to the <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">Terms of Service</a> and <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">Privacy Policy</a>. I understand that HealthPredict is HIPAA compliant.
+                                        I agree to the <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">Terms of Service</a> and <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">Privacy Policy</a>. I understand that ICARE is HIPAA compliant.
                                     </label>
                                 </div>
                                 
                                 <div class="pt-2">
                                     <button type="submit" id="signupButton" class="w-full py-4 bg-gradient-to-r from-blue-600 to-teal-500 text-white font-bold rounded-xl hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                                        <span id="signupButtonText">Create HealthPredict Account</span>
+                                        <span id="signupButtonText">Create ICARE Account</span>
                                         <div id="signupSpinner" class="hidden spinner mx-auto mt-2 border-2 border-white/30 border-t-white w-6 h-6"></div>
                                     </button>
                                 </div>
@@ -336,13 +386,13 @@
                     <div class="w-8 h-8 bg-gradient-to-br from-blue-600 to-teal-500 rounded-lg flex items-center justify-center">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                     </div>
-                    <span class="text-xl font-bold text-white">HealthPredict</span>
+                    <span class="text-xl font-bold text-white">ICARE</span>
                 </div>
                 <p class="max-w-2xl mx-auto">Transforming healthcare through AI-powered predictive analytics. Secure, accurate, and designed for medical professionals.</p>
             </div>
             
             <div class="pt-8 border-t border-slate-800 text-center">
-                <p>&copy; 2025 HealthPredict AI System. All rights reserved. HIPAA Compliant • SOC 2 Certified</p>
+                <p>&copy; 2025 ICARE AI System. All rights reserved. HIPAA Compliant • SOC 2 Certified</p>
             </div>
         </div>
     </footer>

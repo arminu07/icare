@@ -1,0 +1,11 @@
+patient_id,age,gender,blood_pressure,cholesterol,glucose,risk_level
+21,40,M,135,210,150,Medium
+22,45,F,140,220,160,Medium
+23,38,M,130,205,145,Medium
+24,50,F,145,230,170,Medium
+25,47,M,138,215,158,Medium
+26,42,F,132,208,148,Medium
+27,49,M,142,225,165,Medium
+28,44,F,136,212,152,Medium
+29,36,M,128,200,140,Medium
+30,52,F,148,235,175,Medium

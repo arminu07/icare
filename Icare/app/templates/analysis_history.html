@@ -1,17 +1,59 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analysis History - HealthPredict</title>
+    <title>Analysis History - ICARE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="{% static 'js/theme.js' %}"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%);
             min-height: 100vh;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .text-slate-900 { color: #e2e8f0; }
+        body.dark-mode .text-slate-700 { color: #cbd5e1; }
+        body.dark-mode .text-slate-600 { color: #94a3b8; }
+        body.dark-mode .border-slate-200 { border-color: #334155; }
+        body.dark-mode .glass-card { background: rgba(30, 41, 59, 0.85); border-color: rgba(51, 65, 85, 0.3); }
+        body.dark-mode .stat-card { background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%); }
+        body.dark-mode input, body.dark-mode select {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-color: #334155;
+        }
+        body.dark-mode input::placeholder { color: #64748b; }
+
+        .theme-toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.25rem;
+            color: #94a3b8;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+        }
+
+        body.dark-mode .theme-toggle-btn {
+            color: #cbd5e1;
+        }
+
+        .theme-toggle-btn:hover {
+            color: #3b82f6;
+            transform: scale(1.1);
         }
 
         @keyframes fadeInUp {
@@ -54,21 +96,24 @@
     </style>
 </head>
 <body class="text-slate-900">
-    <!-- Navigation -->
-    <nav class="sticky top-0 z-50 glass-card border-b border-slate-200/50">
+    <nav class="sticky top-0 z-50 glass-card border-b border-slate-200/50 dark:border-slate-700/50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center gap-2">
                     <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-teal-500 rounded-xl flex items-center justify-center">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                     </div>
-                    <a href="{% url 'home' %}" class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">HealthPredict</a>
+                    <a href="{% url 'home' %}" class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">ICARE</a>
                 </div>
                 <div class="flex items-center gap-4">
-                    <a href="{% url 'dashboard' %}" class="text-slate-600 hover:text-blue-600 transition">Back to Dashboard</a>
+                    <button class="theme-toggle-btn" onclick="toggleTheme()">
+                        <i class="fas fa-moon"></i>
+                        <span class="hidden md:inline text-sm">Dark</span>
+                    </button>
+                    <a href="{% url 'dashboard' %}" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition">Back to Dashboard</a>
                     {% if user.is_authenticated %}
-                        <span class="text-slate-700">{{ user.first_name|default:user.username }}</span>
-                        <a href="{% url 'logout' %}" class="text-slate-600 hover:text-red-600 transition">Logout</a>
+                        <span class="text-slate-700 dark:text-slate-300">{{ user.first_name|default:user.username }}</span>
+                        <a href="{% url 'logout' %}" class="text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 transition">Logout</a>
                     {% endif %}
                 </div>
             </div>
@@ -79,11 +124,11 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <!-- Header -->
         <div class="mb-12 animate-fade-in-up">
-            <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">
                 <i class="fas fa-history text-blue-600 mr-3"></i>
                 Analysis History
             </h1>
-            <p class="text-lg text-slate-600">View and manage all your previous medical analyses</p>
+            <p class="text-lg text-slate-600 dark:text-slate-300">View and manage all your previous medical analyses</p>
         </div>
 
         <!-- Summary Stats -->

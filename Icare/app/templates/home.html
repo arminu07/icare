@@ -1,17 +1,41 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HealthPredict | AI-Powered Healthcare Analytics</title>
+    <title>ICARE | AI-Powered Healthcare Analytics</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="{% static 'js/theme.js' %}"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%);
             overflow-x: hidden;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f1f5f9;
+        }
+
+        body.dark-mode .glass-card {
+            background: rgba(30, 41, 59, 0.95);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-mode .text-slate-600 {
+            color: #cbd5e1;
+        }
+
+        body.dark-mode .text-slate-900 {
+            color: #f1f5f9;
+        }
+
+        body.dark-mode .border-slate-200\/50 {
+            border-color: rgba(255, 255, 255, 0.1);
         }
         
         /* Enhanced animations */
@@ -296,6 +320,31 @@
                         0 0 30px rgba(16, 185, 129, 0.3),
                         0 0 45px rgba(139, 92, 246, 0.2);
         }
+
+        .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #374151;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        body.dark-mode .theme-toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #cbd5e1;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
     </style>
 </head>
 <body class="text-slate-900">
@@ -304,7 +353,7 @@
     <div id="pageLoader" class="page-loader">
         <div class="loader-content">
             <div class="spinner mb-6"></div>
-            <h3 class="text-2xl font-bold gradient-text mb-4">HealthPredict AI</h3>
+            <h3 class="text-2xl font-bold gradient-text mb-4">ICARE </h3>
             <p class="text-slate-600">Initializing predictive analytics engine...</p>
             <div class="loader-dots">
                 <div class="loader-dot"></div>
@@ -323,27 +372,31 @@
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                     </div>
                     <span class="text-2xl font-bold gradient-text">ICARE</span>
-                    <span class="text-xs bg-gradient-to-r from-blue-600 to-teal-500 text-white px-2 py-1 rounded-full">AI v2.0</span>
+                    <!-- <span class="text-xs bg-gradient-to-r from-blue-600 to-teal-500 text-white px-2 py-1 rounded-full">AI v2.0</span> -->
                 </div>
                 <div class="hidden md:flex space-x-8 animate-fade-in-up" style="animation-delay: 0.2s">
-                    <a href="#" class="relative text-slate-600 hover:text-blue-600 transition duration-300 group">
+                    <a href="#Features" class="relative text-slate-600 hover:text-blue-600 transition duration-300 group">
                         <span>Features</span>
                         <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-teal-500 group-hover:w-full transition-all duration-300"></span>
                     </a>
-                    <a href="#" class="relative text-slate-600 hover:text-blue-600 transition duration-300 group">
+                    <a href="#Analytics" class="relative text-slate-600 hover:text-blue-600 transition duration-300 group">
                         <span>Analytics</span>
                         <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-teal-500 group-hover:w-full transition-all duration-300"></span>
                     </a>
-                    <a href="#" class="relative text-slate-600 hover:text-blue-600 transition duration-300 group">
+                    <a href="#Research" class="relative text-slate-600 hover:text-blue-600 transition duration-300 group">
                         <span>Research</span>
                         <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-teal-500 group-hover:w-full transition-all duration-300"></span>
                     </a>
-                    <a href="#" class="relative text-slate-600 hover:text-blue-600 transition duration-300 group">
+                    <a href="#Contact" class="relative text-slate-600 hover:text-blue-600 transition duration-300 group">
                         <span>Contact</span>
                         <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-teal-500 group-hover:w-full transition-all duration-300"></span>
                     </a>
                 </div>
                 <div class="flex items-center gap-4 animate-slide-right">
+                    <button class="theme-toggle-btn" onclick="toggleTheme()">
+                        <i class="fas fa-moon" id="themeIcon"></i>
+                        <span id="themeText" class="hidden sm:inline">Light</span>
+                    </button>
                     {% if user.is_authenticated %}
                         <a href="{% url 'logout' %}" class="text-blue-600 font-medium hover:text-blue-700 transition duration-300 hover-lift">Logout</a>
                     {% else %}
@@ -400,11 +453,11 @@
                         <span>Try Live Predictor</span>
                         <svg class="w-5 h-5 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </a>
-                    <button class="group glass-card border border-slate-200 text-slate-700 px-10 py-5 rounded-xl font-semibold hover:bg-white transition duration-300 transform hover:-translate-y-1 hover:shadow-xl flex items-center justify-center gap-3 hover-lift">
+                    <!-- <button class="group glass-card border border-slate-200 text-slate-700 px-10 py-5 rounded-xl font-semibold hover:bg-white transition duration-300 transform hover:-translate-y-1 hover:shadow-xl flex items-center justify-center gap-3 hover-lift">
                         <i class="fas fa-play-circle text-blue-500 text-xl"></i>
                         <span>Watch Demo</span>
                         <i class="fas fa-external-link-alt text-sm text-slate-400 group-hover:text-blue-500 transition"></i>
-                    </button>
+                    </button> -->
                 </div>
             </div>
             
@@ -481,7 +534,7 @@
                 <div class="w-32 h-1.5 bg-gradient-to-r from-blue-600 to-teal-500 mx-auto mt-8 rounded-full progress-bar"></div>
             </div>
             
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+            <div id="Analytics" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
                 <!-- Feature 1 - Enhanced -->
                 <div class="group p-8 rounded-2xl glass-card border border-slate-100 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 animate-fade-in-up card-glow">
                     <div class="relative mb-6">
@@ -625,7 +678,7 @@
                 <div class="w-24 h-1.5 bg-gradient-to-r from-blue-600 to-teal-500 mx-auto mt-6 rounded-full"></div>
             </div>
             
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div id="Research" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Image Card 1 -->
                 <div class="group rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 animate-fade-in-up">
                     <div class="relative h-64 overflow-hidden">
@@ -708,7 +761,7 @@
     </section>
 
     <!-- How It Works Section - Enhanced -->
-    <section class="py-24">
+    <section class="py-24" id="Features">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-20 animate-fade-in-up">
                 <h2 class="text-4xl md:text-5xl font-bold text-slate-900 mb-6">From Data to Insights in Minutes</h2>
@@ -722,7 +775,7 @@
                 
                 <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
                     <!-- Step 1 - Enhanced -->
-                    <div class="relative text-center group">
+                    <div id="Features" class="relative text-center group">
                         <div class="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-r from-blue-600 to-teal-500 text-white rounded-full flex items-center justify-center text-lg font-bold shadow-lg floating-element">1</div>
                         <div class="p-8 pt-12 rounded-2xl glass-card border border-slate-100 hover:shadow-2xl transition-all duration-500 group-hover:border-blue-300 group-hover:bg-gradient-to-br from-blue-50 to-white">
                             <div class="w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-500 shadow-inner">
@@ -790,7 +843,7 @@
     </section>
 
     <!-- Demo Prediction Section - Enhanced -->
-    <section class="py-24 bg-gradient-to-b from-blue-50 to-white">
+    <!-- <section class="py-24 bg-gradient-to-b from-blue-50 to-white">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 animate-fade-in-up">
                 <div class="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm mb-6">
@@ -992,11 +1045,11 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> -->
 
     <!-- Enhanced Footer -->
     <footer class="bg-gradient-to-br from-slate-900 to-slate-800 text-slate-400 py-20">
-        <div class="max-w-7xl mx-auto px-4">
+        <div id="Contact" class="max-w-7xl mx-auto px-4">
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
                 <div>
                     <div class="flex items-center gap-3 mb-8">
@@ -1004,7 +1057,7 @@
                             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                         </div>
                         <div>
-                            <span class="text-2xl font-bold text-white block">HealthPredict</span>
+                            <span class="text-2xl font-bold text-white block">ICARE</span>
                             <span class="text-sm text-slate-400">AI Healthcare Platform</span>
                         </div>
                     </div>
@@ -1122,13 +1175,13 @@
     </button>
 
     <!-- Floating Chat Assistant -->
-    <button id="chatAssistant" class="fixed bottom-8 left-8 w-14 h-14 bg-gradient-to-br from-purple-600 to-pink-500 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-110 group animate-float">
+    <!-- <button id="chatAssistant" class="fixed bottom-8 left-8 w-14 h-14 bg-gradient-to-br from-purple-600 to-pink-500 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-110 group animate-float">
         <i class="fas fa-robot"></i>
         <div class="absolute -top-10 left-0 bg-slate-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
             AI Assistant
         </div>
         <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-ping"></span>
-    </button>
+    </button> -->
 
     <script>
         // Page Loader

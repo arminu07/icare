@@ -1,0 +1,356 @@
+<!-- 
+    TEMPLATE SNIPPETS FOR EMAIL ALERTS AND DISEASE PRECAUTIONS
+    
+    This file contains reusable HTML snippets for incorporating email alerts
+    and disease precaution cards into dashboard.html and analysis_detail.html
+    
+    SNIPPET 1: Email Alert Banner
+    SNIPPET 2: Prediction Cards with Precautions
+    SNIPPET 3: Django settings.py Email Configuration (as HTML comment)
+-->
+
+<!-- ============================================================
+     SNIPPET 1: EMAIL ALERT BANNER (for dashboard.html)
+     ============================================================
+     
+     Usage in dashboard.html after results header:
+     {% include "template_snippets.html" with snippet="email_alert_banner" %}
+     
+     Or directly:
+ -->
+
+{% comment %}
+EMAIL ALERT BANNER SNIPPET - Copy this block into dashboard.html
+{% endcomment %}
+
+<div id="emailAlertBanner" style="display: {% if email_alert_sent %}block{% else %}none{% endif %}; 
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-left: 5px solid #7f1d1d;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+    
+    <div style="display: flex; align-items: flex-start; gap: 16px;">
+        <div style="font-size: 32px; flex-shrink: 0;">⚠️</div>
+        <div style="flex: 1;">
+            <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: bold;">
+                High-Risk Disease Alert Sent
+            </h3>
+            <p style="margin: 0 0 12px 0; font-size: 14px; opacity: 0.95;">
+                An email alert has been sent to <strong>{{ request.user.email }}</strong> 
+                regarding {{ alert_disease_count }} high-risk 
+                disease{% if alert_disease_count != 1 %}s{% endif %} detected in this analysis.
+            </p>
+            <p style="margin: 0; font-size: 13px; opacity: 0.9;">
+                📧 Check your email for detailed recommendations and immediate action steps.
+            </p>
+        </div>
+        <button onclick="document.getElementById('emailAlertBanner').style.display='none';" 
+            style="background: rgba(255, 255, 255, 0.2);
+                   border: none;
+                   color: white;
+                   font-size: 20px;
+                   cursor: pointer;
+                   padding: 4px 8px;
+                   border-radius: 4px;
+                   flex-shrink: 0;
+                   transition: background 0.2s;">
+            ✕
+        </button>
+    </div>
+</div>
+
+
+<!-- ============================================================
+     SNIPPET 2: PREDICTION CARDS WITH PRECAUTIONS
+     ============================================================
+     
+     Usage in dashboard.html or analysis_detail.html in the predictions section:
+     {% for pred in results.full_predictions %}
+         <!-- Include prediction card HTML here -->
+     {% endfor %}
+     
+     Full implementation:
+ -->
+
+{% comment %}
+PREDICTION CARDS SNIPPET - Copy this block for displaying predictions with precautions
+Use inside: {% for pred in results.full_predictions %}
+{% endcomment %}
+
+<div style="background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;">
+    
+    <!-- Disease Header -->
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+        <span style="font-size: 28px;">{% if pred.precaution_data %}{{ pred.precaution_data.icon }}{% else %}🏥{% endif %}</span>
+        <div style="flex: 1;">
+            <h4 style="margin: 0 0 4px 0; font-size: 18px; font-weight: bold; color: #1f2937;">
+                {{ pred.disease }}
+            </h4>
+            <span style="display: inline-block;
+                   padding: 4px 12px;
+                   border-radius: 20px;
+                   font-size: 12px;
+                   font-weight: bold;
+                   color: white;
+                   background: {% if pred.risk == 'High' %}#dc2626{% elif pred.risk == 'Medium' %}#ea580c{% else %}#16a34a{% endif %};">
+                {{ pred.risk }} Risk
+            </span>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-size: 24px; font-weight: bold; color: #1f2937;">{{ pred.confidence }}%</div>
+            <div style="font-size: 12px; color: #6b7280;">Confidence</div>
+        </div>
+    </div>
+    
+    <!-- Confidence Progress Bar -->
+    <div style="width: 100%; 
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;">
+        <div style="height: 100%;
+                width: {{ pred.confidence }}%;
+                background: linear-gradient(90deg, 
+                    {% if pred.risk == 'High' %}#dc2626 0%, #991b1b{% elif pred.risk == 'Medium' %}#ea580c 0%, #c2410c{% else %}#16a34a 0%, #15803d{% endif %} 100%);
+                border-radius: 4px;
+                transition: width 0.3s ease;">
+        </div>
+    </div>
+    
+    <!-- Clinical Reasoning Section -->
+    {% if pred.reasoning %}
+    <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-left: 4px solid #0284c7;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 13px;">
+        <h6 style="margin: 0 0 8px 0; 
+                  font-size: 12px; 
+                  font-weight: bold; 
+                  color: #0c4a6e;">
+            🔬 Clinical Reasoning & Analysis
+        </h6>
+        <p style="margin: 0; 
+                 color: #074e7b; 
+                 white-space: pre-wrap;
+                 line-height: 1.5;
+                 font-family: 'Courier New', monospace;
+                 font-size: 12px;">{{ pred.reasoning }}</p>
+    </div>
+    {% endif %}
+    
+    <!-- Precautions Section (only for High and Medium risk) -->
+    {% if pred.precaution_data %}
+    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+        <h5 style="margin: 0 0 16px 0; font-size: 14px; font-weight: bold; color: #1f2937;">
+            🛡️ Healthcare Recommendations
+        </h5>
+        
+        <!-- Precautions List -->
+        <div style="margin-bottom: 16px;">
+            <h6 style="margin: 0 0 12px 0; font-size: 12px; font-weight: bold; color: #6b7280; text-transform: uppercase;">
+                Prevention & Management Tips
+            </h6>
+            <ul style="margin: 0; padding-left: 20px; list-style-position: inside;">
+                {% for tip in pred.precaution_data.precautions %}
+                <li style="margin-bottom: 8px; 
+                           color: #374151; 
+                           font-size: 13px;
+                           line-height: 1.6;">
+                    {{ tip }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <!-- Diet Tips Box -->
+        <div style="background: linear-gradient(135deg, #d1fae5 0%, #ecfdf5 100%);
+                border-left: 4px solid #10b981;
+                padding: 12px;
+                border-radius: 8px;
+                margin-bottom: 12px;">
+            <h6 style="margin: 0 0 8px 0; 
+                      font-size: 12px; 
+                      font-weight: bold; 
+                      color: #065f46;">
+                🥗 Diet & Nutrition Tips
+            </h6>
+            <p style="margin: 0; 
+                     color: #047857; 
+                     font-size: 13px; 
+                     line-height: 1.6;">
+                {{ pred.precaution_data.diet_tips }}
+            </p>
+        </div>
+        
+        <!-- When to See Doctor Box -->
+        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
+                border-left: 4px solid #f59e0b;
+                padding: 12px;
+                border-radius: 8px;">
+            <h6 style="margin: 0 0 8px 0; 
+                      font-size: 12px; 
+                      font-weight: bold; 
+                      color: #92400e;">
+                ⚡ When to See Your Doctor
+            </h6>
+            <p style="margin: 0; 
+                     color: #b45309; 
+                     font-size: 13px; 
+                     line-height: 1.6;">
+                {{ pred.precaution_data.when_to_see_doctor }}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+
+<!-- ============================================================
+     SNIPPET 3: DJANGO SETTINGS.PY EMAIL CONFIGURATION
+     ============================================================
+     
+     Add this configuration to your Django settings.py file
+     to enable email alerts functionality.
+     
+     IMPORTANT: Keep EMAIL_HOST_PASSWORD and EMAIL_HOST_USER secure!
+     Use environment variables instead of hardcoding values.
+     
+ -->
+
+<!-- 
+EMAIL CONFIGURATION FOR SETTINGS.PY
+
+# ============================================================
+# EMAIL CONFIGURATION FOR HIGH-RISK HEALTH ALERTS
+# ============================================================
+# 
+# This configuration enables the system to send HTML emails
+# when high-risk diseases are detected during medical analysis.
+#
+# REQUIRED SETUP:
+# ---------------
+# 1. Create a Gmail App Password:
+#    - Go to https://myaccount.google.com/apppasswords
+#    - Sign in with your Gmail account
+#    - Select "Mail" and "Windows Computer" (or your device)
+#    - Google will generate a 16-character password
+#    - Copy this password for use in EMAIL_HOST_PASSWORD
+#
+# 2. Update the settings below with your Gmail credentials:
+#    - EMAIL_HOST_USER: Your full Gmail address (example@gmail.com)
+#    - EMAIL_HOST_PASSWORD: The 16-character app password from step 1
+#    - DEFAULT_FROM_EMAIL: The email address alerts will come from
+#
+# 3. For production, use environment variables:
+#    import os
+#    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+#    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+#
+# ============================================================
+
+# Email Backend - Use Django's SMTP backend
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# Gmail SMTP Server Configuration
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# Gmail Account Credentials
+# IMPORTANT: Use app-specific password, not your regular Gmail password!
+EMAIL_HOST_USER = 'your-email@gmail.com'
+EMAIL_HOST_PASSWORD = 'your-16-char-app-password'
+
+# Sender Email Address (for high-risk health alerts)
+DEFAULT_FROM_EMAIL = 'your-email@gmail.com'
+
+# Optional: Email timeout (in seconds)
+EMAIL_TIMEOUT = 30
+
+# Optional: Fail silently (set to False to raise exceptions)
+# Set to True in production to prevent email errors from breaking the app
+EMAIL_FAIL_SILENTLY = False
+
+# ============================================================
+# TROUBLESHOOTING
+# ============================================================
+#
+# Issue: "SMTPAuthenticationError: Application-specific password required"
+# Solution: You're using your regular Gmail password instead of an app password.
+#           Generate an app password following the steps above.
+#
+# Issue: "SMTPNotSupportedError: SMTP AUTH extension not supported by server"
+# Solution: Ensure EMAIL_USE_TLS = True and EMAIL_PORT = 587
+#
+# Issue: "Connection refused" or "timeout"
+# Solution: Check your firewall settings. Gmail SMTP may be blocked.
+#           Try enabling "Less secure apps" or use a different SMTP provider.
+#
+# Issue: Emails not sending but no errors in logs
+# Solution: Check EMAIL_FAIL_SILENTLY. If True, errors are suppressed.
+#           Set to False temporarily for debugging.
+#
+# ============================================================
+# ALTERNATIVE EMAIL PROVIDERS
+# ============================================================
+#
+# SendGrid:
+#   EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
+#   SENDGRID_API_KEY = 'your-sendgrid-api-key'
+#
+# AWS SES:
+#   EMAIL_BACKEND = 'django_ses.SESBackend'
+#   AWS_ACCESS_KEY_ID = 'your-access-key'
+#   AWS_SECRET_ACCESS_KEY = 'your-secret-key'
+#
+# Mailgun:
+#   EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
+#   ANYMAIL = {'MAILGUN_API_KEY': 'your-api-key'}
+#
+# ============================================================
+-->
+
+
+<!-- ============================================================
+     DARK MODE SUPPORT NOTE
+     ============================================================
+     
+     All snippets above use inline CSS with dark/light theme support.
+     To add CSS variable support for automatic dark mode:
+     
+     Add this to your main CSS file or template <head>:
+     
+     :root {
+         --bg-primary: #ffffff;
+         --bg-secondary: #f9fafb;
+         --text-primary: #1f2937;
+         --text-secondary: #6b7280;
+         --border-color: #e5e7eb;
+     }
+     
+     @media (prefers-color-scheme: dark) {
+         :root {
+             --bg-primary: #1f2937;
+             --bg-secondary: #111827;
+             --text-primary: #f3f4f6;
+             --text-secondary: #d1d5db;
+             --border-color: #374151;
+         }
+     }
+     
+     Then update inline styles to use: background: var(--bg-primary);
+     
+ ============================================================ -->

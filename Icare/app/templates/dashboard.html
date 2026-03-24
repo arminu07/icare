@@ -624,6 +624,154 @@
                     </div>
                 </div>
 
+                <!-- Detailed Prediction Cards with Reasoning and Precautions -->
+                {% if results.full_predictions %}
+                <div class="card p-8">
+                    <h4 class="text-xl font-bold mb-6 flex items-center gap-2">
+                        <i class="fas fa-heartbeat text-blue-400"></i>
+                        Detailed Disease Analysis with Clinical Reasoning
+                    </h4>
+                    
+                    {% for pred in results.full_predictions %}
+                    <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+                            border: 1px solid #334155;
+                            border-radius: 12px;
+                            padding: 24px;
+                            margin-bottom: 20px;
+                            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+                            transition: all 0.3s ease;">
+                        
+                        <!-- Disease Header -->
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                            <span style="font-size: 28px;">{% if pred.precaution_data %}{{ pred.precaution_data.icon }}{% else %}🏥{% endif %}</span>
+                            <div style="flex: 1;">
+                                <h4 style="margin: 0 0 4px 0; font-size: 18px; font-weight: bold; color: #e2e8f0;">
+                                    {{ pred.disease }}
+                                </h4>
+                                <span style="display: inline-block;
+                                       padding: 4px 12px;
+                                       border-radius: 20px;
+                                       font-size: 12px;
+                                       font-weight: bold;
+                                       color: white;
+                                       background: {% if pred.risk == 'High' %}#dc2626{% elif pred.risk == 'Medium' %}#ea580c{% else %}#16a34a{% endif %};">
+                                    {{ pred.risk }} Risk
+                                </span>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 24px; font-weight: bold; color: #e2e8f0;">{{ pred.confidence }}%</div>
+                                <div style="font-size: 12px; color: #94a3b8;">Confidence</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Confidence Progress Bar -->
+                        <div style="width: 100%; 
+                                height: 8px;
+                                background: #334155;
+                                border-radius: 4px;
+                                overflow: hidden;
+                                margin-bottom: 20px;">
+                            <div style="height: 100%;
+                                    width: {{ pred.confidence }}%;
+                                    background: linear-gradient(90deg, 
+                                        {% if pred.risk == 'High' %}#dc2626 0%, #991b1b{% elif pred.risk == 'Medium' %}#ea580c 0%, #c2410c{% else %}#16a34a 0%, #15803d{% endif %} 100%);
+                                    border-radius: 4px;
+                                    transition: width 0.3s ease;">
+                            </div>
+                        </div>
+                        
+                        <!-- Clinical Reasoning Section -->
+                        {% if pred.reasoning %}
+                        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%);
+                                border-left: 4px solid #3b82f6;
+                                padding: 12px;
+                                border-radius: 8px;
+                                margin-bottom: 16px;
+                                font-size: 13px;">
+                            <h6 style="margin: 0 0 8px 0; 
+                                      font-size: 12px; 
+                                      font-weight: bold; 
+                                      color: #93c5fd;">
+                                🔬 Clinical Reasoning & Analysis
+                            </h6>
+                            <p style="margin: 0; 
+                                     color: #bfdbfe; 
+                                     white-space: pre-wrap;
+                                     line-height: 1.5;
+                                     font-family: 'Courier New', monospace;
+                                     font-size: 12px;">{{ pred.reasoning }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Precautions Section (only for High and Medium risk) -->
+                        {% if pred.precaution_data %}
+                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #334155;">
+                            <h5 style="margin: 0 0 16px 0; font-size: 14px; font-weight: bold; color: #e2e8f0;">
+                                🛡️ Healthcare Recommendations
+                            </h5>
+                            
+                            <!-- Precautions List -->
+                            <div style="margin-bottom: 16px;">
+                                <h6 style="margin: 0 0 12px 0; font-size: 12px; font-weight: bold; color: #cbd5e1; text-transform: uppercase;">
+                                    Prevention & Management Tips
+                                </h6>
+                                <ul style="margin: 0; padding-left: 20px; list-style-position: inside;">
+                                    {% for tip in pred.precaution_data.precautions %}
+                                    <li style="margin-bottom: 8px; 
+                                               color: #cbd5e1; 
+                                               font-size: 13px;
+                                               line-height: 1.6;">
+                                        {{ tip }}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            
+                            <!-- Diet Tips Box -->
+                            <div style="background: linear-gradient(135deg, #064e3b 0%, #0d3e2b 100%);
+                                    border-left: 4px solid #10b981;
+                                    padding: 12px;
+                                    border-radius: 8px;
+                                    margin-bottom: 12px;">
+                                <h6 style="margin: 0 0 8px 0; 
+                                          font-size: 12px; 
+                                          font-weight: bold; 
+                                          color: #6ee7b7;">
+                                    🥗 Diet & Nutrition Tips
+                                </h6>
+                                <p style="margin: 0; 
+                                         color: #86efac; 
+                                         font-size: 13px; 
+                                         line-height: 1.6;">
+                                    {{ pred.precaution_data.diet_tips }}
+                                </p>
+                            </div>
+                            
+                            <!-- When to See Doctor Box -->
+                            <div style="background: linear-gradient(135deg, #78350f 0%, #5a2d0c 100%);
+                                    border-left: 4px solid #f59e0b;
+                                    padding: 12px;
+                                    border-radius: 8px;">
+                                <h6 style="margin: 0 0 8px 0; 
+                                          font-size: 12px; 
+                                          font-weight: bold; 
+                                          color: #fcd34d;">
+                                    ⚡ When to See Your Doctor
+                                </h6>
+                                <p style="margin: 0; 
+                                         color: #fde68a; 
+                                         font-size: 13px; 
+                                         line-height: 1.6;">
+                                    {{ pred.precaution_data.when_to_see_doctor }}
+                                </p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
                 <!-- Recommendations -->
                 <div class="card p-8">
                     <h4 class="text-xl font-bold mb-6 flex items-center gap-2">

@@ -12,6 +12,8 @@ from datetime import datetime
 from django.db import models as django_models
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
+from .email_alerts import send_high_risk_alert
+from .disease_precautions import get_precautions_for_predictions
 
 logger = logging.getLogger(__name__)
 
@@ -269,6 +271,37 @@ def dashboard(request):
                 )
                 logger.info(f"[CSV_UPLOAD] ✓ Analysis result saved with ID: {analysis_result.id}")
                 
+                # ============ EMAIL ALERT FOR HIGH-RISK DISEASES ============
+                email_alert_sent = False
+                alert_disease_count = 0
+                try:
+                    # Get high-risk diseases
+                    high_risk_diseases = analysis_result.get_high_risk_diseases()
+                    
+                    if high_risk_diseases:
+                        alert_disease_count = len(high_risk_diseases)
+                        logger.info(f"[CSV_UPLOAD] Attempting to send high-risk alert for {alert_disease_count} diseases...")
+                        
+                        # Send email alert (non-blocking)
+                        email_alert_sent = send_high_risk_alert(
+                            request.user,
+                            analysis_result,
+                            high_risk_diseases
+                        )
+                    else:
+                        logger.info(f"[CSV_UPLOAD] No high-risk diseases detected, skipping alert email")
+                        
+                except Exception as e:
+                    # Log the error but don't break the workflow
+                    logger.error(
+                        f"[CSV_UPLOAD] Error sending high-risk alert email: {str(e)}",
+                        exc_info=True
+                    )
+                    email_alert_sent = False
+                
+                # ============ ENRICH PREDICTIONS WITH PRECAUTIONS ============
+                enriched_predictions = get_precautions_for_predictions(formatted_predictions)
+                
                 # Prepare context for template
                 context['results'] = {
                     'analysis_id': analysis_result.id,
@@ -280,8 +313,12 @@ def dashboard(request):
                     'medium_risk_count': prediction_results['medium_risk_count'],
                     'low_risk_count': prediction_results['low_risk_count'],
                     'avg_confidence': prediction_results['avg_confidence'],
-                    'full_predictions': formatted_predictions,
+                    'full_predictions': enriched_predictions,
                 }
+                
+                # Add email alert status to context
+                context['email_alert_sent'] = email_alert_sent
+                context['alert_disease_count'] = alert_disease_count
                 
                 context['success'] = f'✓ Successfully analyzed {len(medical_data)} patient records!'
                 logger.info(f"[CSV_UPLOAD] ✓✓✓ UPLOAD COMPLETE by {request.user.email}")
@@ -308,6 +345,10 @@ def analysis_detail(request, analysis_id):
 
         # Get all possible diseases and their risks for the patient
         all_predictions = analysis.predictions_json.get('predictions', [])
+        
+        # Enrich predictions with precaution data
+        enriched_predictions = get_precautions_for_predictions(all_predictions)
+        
         # If not all diseases are present, fill in missing ones as 'Low' risk, 0 confidence
         from .disease_predictor import DiseasePredictor
         all_disease_names = DiseasePredictor().disease_categories
@@ -331,7 +372,7 @@ def analysis_detail(request, analysis_id):
                 'medium_risk_count': analysis.medium_risk_count,
                 'low_risk_count': analysis.low_risk_count,
                 'avg_confidence': analysis.average_confidence,
-                'full_predictions': all_predictions,
+                'full_predictions': enriched_predictions,
             },
             'report': analysis.medical_report,
         })

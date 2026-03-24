@@ -1,0 +1,2 @@
+age,gender,blood_pressure,cholesterol,glucose,bmi,smoking,alcohol,physical_activity,family_history,clinical_notes,medications,allergies
+58,Male,165/98,285,210,32.4,Yes,Yes,Low,Diabetes|Heart Disease,Patient reports frequent chest pain and shortness of breath. Family history of cardiac disease.,Metformin 500mg,Penicillin

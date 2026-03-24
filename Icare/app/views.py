@@ -15,11 +15,20 @@ from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 
+# Helper function to add theme context
+def get_theme_context(request):
+    """Get theme context for rendering templates"""
+    theme = request.COOKIES.get('theme', 'dark')
+    return {'theme': theme}
+
 # Create your views here.
 def home(request):
-    return render(request,'home.html')
+    context = get_theme_context(request)
+    response = render(request,'home.html', context)
+    return response
 
 def login_view(request):
+    context = get_theme_context(request)
     if request.method == 'POST':
         email = request.POST.get('email', '')
         password = request.POST.get('password', '')
@@ -44,17 +53,19 @@ def login_view(request):
                     error_msg = 'Invalid email or password.'
                     logger.warning(f"Login attempt with non-existent email: {email}")
                 
-                return render(request, 'login.html', {'error': error_msg})
+                context['error'] = error_msg
+                return render(request, 'login.html', context)
                 
         except Exception as e:
             error_msg = f'Error during login: {str(e)}'
             logger.error(f"Login error for {email}: {str(e)}", exc_info=True)
-            return render(request, 'login.html', {'error': error_msg})
+            return render(request, 'login.html', context)
     
-    return render(request, 'login.html')
+    return render(request, 'login.html', context)
 
 
 def signup (request):
+    context = get_theme_context(request)
     if request.method =='POST':
         first_name = request.POST.get('FirstName', '')
         last_name = request.POST.get('lastName', '')
@@ -69,17 +80,20 @@ def signup (request):
             if User.objects.filter(email=email).exists():
                 error_msg = 'Email already registered. Please use a different email or login.'
                 logger.warning(f"Signup attempt with existing email: {email}")
-                return render(request, 'signup.html', {'error': error_msg})
+                context['error'] = error_msg
+                return render(request, 'signup.html', context)
             
             if Patients.objects.filter(email=email).exists():
                 error_msg = 'Email already registered in patient database. Please use a different email or login.'
                 logger.warning(f"Patient signup attempt with existing email: {email}")
-                return render(request, 'signup.html', {'error': error_msg})
+                context['error'] = error_msg
+                return render(request, 'signup.html', context)
             
             # Validate required fields
             if not email or not password:
                 error_msg = 'Email and password are required.'
-                return render(request, 'signup.html', {'error': error_msg})
+                context['error'] = error_msg
+                return render(request, 'signup.html', context)
             
             # Create Django user
             user = User.objects.create_user(
@@ -107,9 +121,10 @@ def signup (request):
         except Exception as e:
             error_msg = f'Error creating account: {str(e)}'
             logger.error(f"Signup error for {email}: {str(e)}", exc_info=True)
-            return render(request, 'signup.html', {'error': error_msg})
+            context['error'] = error_msg
+            return render(request, 'signup.html', context)
     
-    return render(request, 'signup.html')
+    return render(request, 'signup.html', context)
 
 def logout_view(request):
     logout(request)
@@ -123,10 +138,11 @@ def logout_view(request):
 @login_required(login_url='login')
 def dashboard(request):
     """Dashboard view for uploading CSV reports and viewing disease predictions"""
-    context = {
+    context = get_theme_context(request)
+    context.update({
         'upload_status': None,
         'upload_progress': None,
-    }
+    })
     
     # Load analysis results history
     recent_analyses = AnalysisResult.objects.filter(user=request.user).order_by('-created_at')[:3]
@@ -285,30 +301,41 @@ def dashboard(request):
 @login_required(login_url='login')
 def analysis_detail(request, analysis_id):
     """View detailed analysis results"""
+    context = get_theme_context(request)
     try:
         analysis = AnalysisResult.objects.get(id=analysis_id, user=request.user)
         
-        predictions = analysis.get_top_predictions(limit=15)
-        disease_names = [p['disease'] for p in predictions]
-        disease_confidences = [p['confidence'] for p in predictions]
-        
-        context = {
+
+        # Get all possible diseases and their risks for the patient
+        all_predictions = analysis.predictions_json.get('predictions', [])
+        # If not all diseases are present, fill in missing ones as 'Low' risk, 0 confidence
+        from .disease_predictor import DiseasePredictor
+        all_disease_names = DiseasePredictor().disease_categories
+        disease_risk_map = {p['disease']: p['risk'] for p in all_predictions}
+        disease_conf_map = {p['disease']: p['confidence'] for p in all_predictions}
+        all_disease_risks = [disease_risk_map.get(d, 'Low') for d in all_disease_names]
+        all_disease_confidences = [disease_conf_map.get(d, 0) for d in all_disease_names]
+
+        context.update({
             'analysis': analysis,
             'results': {
                 'analysis_id': analysis.id,
-                'predictions': [(p['disease'], p['confidence'], p['risk']) for p in predictions],
-                'disease_names': disease_names,
-                'disease_confidences': disease_confidences,
+                'predictions': [(p['disease'], p['confidence'], p['risk']) for p in all_predictions],
+                'disease_names': all_disease_names,
+                'disease_confidences': all_disease_confidences,
+                'all_disease_names': all_disease_names,
+                'all_disease_risks': all_disease_risks,
+                'all_disease_confidences': all_disease_confidences,
                 'total_diseases': analysis.total_diseases_analyzed,
                 'high_risk_count': analysis.high_risk_count,
                 'medium_risk_count': analysis.medium_risk_count,
                 'low_risk_count': analysis.low_risk_count,
                 'avg_confidence': analysis.average_confidence,
-                'full_predictions': predictions,
+                'full_predictions': all_predictions,
             },
             'report': analysis.medical_report,
-        }
-        
+        })
+
         return render(request, 'analysis_detail.html', context)
         
     except AnalysisResult.DoesNotExist:
@@ -318,6 +345,7 @@ def analysis_detail(request, analysis_id):
 @login_required(login_url='login')
 def analysis_history(request):
     """View all analysis history with pagination and search"""
+    context = get_theme_context(request)
     analyses = AnalysisResult.objects.filter(user=request.user).order_by('-created_at')
     
     # Search functionality
@@ -375,7 +403,7 @@ def analysis_history(request):
             analysis.get_medium_risk_count = 0
             analysis.get_low_risk_count = 0
     
-    context = {
+    context.update({
         'analyses': analyses_page,
         'page_obj': analyses_page,
         'is_paginated': paginator.num_pages > 1,
@@ -385,7 +413,7 @@ def analysis_history(request):
         'search': search_query,
         'from_date': from_date,
         'to_date': to_date,
-    }
+    })
     
     return render(request, 'analysis_history.html', context)
 

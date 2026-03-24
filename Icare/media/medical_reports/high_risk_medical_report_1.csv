@@ -1,0 +1,11 @@
+patient_id,age,gender,blood_pressure,cholesterol,glucose,risk_level
+1,55,M,160,260,210,High
+2,62,F,170,280,230,High
+3,48,M,155,245,200,High
+4,70,F,180,300,250,High
+5,60,M,165,270,225,High
+6,58,M,158,255,215,High
+7,65,F,172,290,240,High
+8,72,M,185,310,260,High
+9,50,F,150,240,195,High
+10,68,M,175,285,235,High

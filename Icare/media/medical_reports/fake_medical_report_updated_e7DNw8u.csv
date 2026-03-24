@@ -1,0 +1,6 @@
+Patient_ID,Patient_Name,Age,Gender,Report_Date,Diagnosis,Test_Results,Prescribed_Medication,Doctor_Notes,age,blood_pressure,cholesterol,gender,glucose
+1001,John Doe,45,Male,2026-01-10,Hypertension,BP: 150/95,Amlodipine 5mg,Stable,,,,,
+1002,Aisha Khan,32,Female,2026-01-12,Anemia,Hb: 9.8 g/dL,Iron Supplements,Improving,,,,,
+1003,Ravi Kumar,28,Male,2026-01-14,Viral Fever,Temp: 101°F,Paracetamol,Recovered,,,,,
+1004,Meera Nair,55,Female,2026-01-15,Diabetes Type 2,FBS: 165 mg/dL,Metformin,Under Control,,,,,
+1005,Arjun Patel,40,Male,2026-01-18,High Cholesterol,LDL: 180 mg/dL,Atorvastatin,Monitoring,,,,,

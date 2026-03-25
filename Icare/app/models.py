@@ -80,14 +80,17 @@ class AnalysisResult(models.Model):
     low_risk_count = models.IntegerField(default=0)
     average_confidence = models.FloatField(default=0.0)
     
-    # Predictions stored as JSON for detailed records
+    # Email alert audit fields
+    email_alert_sent = models.BooleanField(default=False)
+    alert_disease_count = models.IntegerField(default=0)
+    alert_retry_count = models.IntegerField(default=0)
+    alert_risk_type = models.CharField(max_length=20, blank=True, null=True)
+
+    # Predictions and optional advice fields
     predictions_json = models.JSONField(default=dict)
-    
-    # Clinical recommendations
     recommendations = models.TextField(blank=True, null=True, help_text="AI-generated clinical recommendations")
     follow_up_actions = models.TextField(blank=True, null=True, help_text="Recommended follow-up actions")
-    
-    # Metadata for audit trail
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     analysis_duration = models.FloatField(default=0.0, help_text="Analysis time in seconds")

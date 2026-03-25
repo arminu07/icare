@@ -177,6 +177,36 @@
             </div>
         </div>
 
+        {% if email_alert_sent %}
+        <div class="glass-card rounded-2xl shadow-xl p-6 mb-8 animate-fade-in-up" style="animation-delay: 0.15s; border-left: 4px solid #22c55e;">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                <div>
+                    <h4 class="text-lg font-semibold text-green-700">Email sent for medium/high risk diseases</h4>
+                    <p class="text-sm text-slate-700">Alert sent with {{ alert_disease_count }} diseases. Attempts: {{ alert_retry_count }}.</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    {% for item in results.alert_diseases %}
+                        <span class="risk-badge {% if item.risk == 'High' %}risk-high{% elif item.risk == 'Medium' %}risk-medium{% else %}risk-low{% endif %}">{{ item.disease }} ({{ item.risk }})</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% elif alert_disease_count and not email_alert_sent %}
+        <div class="glass-card rounded-2xl shadow-xl p-6 mb-8 animate-fade-in-up" style="animation-delay: 0.15s; border-left: 4px solid #ef4444;">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                <div>
+                    <h4 class="text-lg font-semibold text-red-700">Email failed for medium/high risk diseases</h4>
+                    <p class="text-sm text-slate-700">Retry attempts: {{ alert_retry_count }}. Please check mail server settings.</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    {% for item in results.alert_diseases %}
+                        <span class="risk-badge {% if item.risk == 'High' %}risk-high{% elif item.risk == 'Medium' %}risk-medium{% else %}risk-low{% endif %}">{{ item.disease }} ({{ item.risk }})</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Results Grid -->
         <div class="grid md:grid-cols-3 gap-6 mb-12 animate-fade-in-up" style="animation-delay: 0.2s">
             <div class="glass-card rounded-2xl shadow-xl p-6 text-center">

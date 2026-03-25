@@ -1,0 +1,2 @@
+age,gender,blood_pressure,cholesterol,glucose,bmi,smoking,alcohol,physical_activity,family_history,clinical_notes,medications,allergies
+68,Male,145/90,240,115,29.5,Yes,Yes,Low,Colon Cancer|Lung Cancer,Long-term smoker (40 pack-years). Unexplained weight loss of 8kg in 3 months. Persistent cough with blood-tinged sputum. Colonoscopy pending. PSA elevated at 7.2 ng/mL. Referred for oncology evaluation.,Omeprazole 20mg|Multivitamin,Ibuprofen

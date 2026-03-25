@@ -354,6 +354,38 @@
         </div>
         {% endif %}
 
+        {% if email_alert_sent %}
+        <div class="alert-box alert-success animate-slide-in">
+            <i class="fas fa-envelope-circle-check flex-shrink-0 text-lg mt-0.5"></i>
+            <div>
+                <div class="font-bold text-sm mb-1">Email Sent</div>
+                <div class="text-sm">Email sent for medium/high risk diseases ({{ alert_disease_count }} total). Retry attempts: {{ alert_retry_count }}.</div>
+                <div class="mt-2 flex flex-wrap gap-2">
+                    {% for item in results.alert_diseases %}
+                    <span class="risk-badge {% if item.risk == 'High' %}risk-high{% elif item.risk == 'Medium' %}risk-medium{% else %}risk-low{% endif %}">
+                        {{ item.disease }} ({{ item.risk }})
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% elif alert_disease_count and not email_alert_sent %}
+        <div class="alert-box alert-error animate-slide-in">
+            <i class="fas fa-envelope-exclamation flex-shrink-0 text-lg mt-0.5"></i>
+            <div>
+                <div class="font-bold text-sm mb-1">Email Not Delivered</div>
+                <div class="text-sm">Failed to send alert email for medium/high risk diseases ({{ alert_disease_count }} total). Attempts: {{ alert_retry_count }}.</div>
+                <div class="mt-2 flex flex-wrap gap-2">
+                    {% for item in results.alert_diseases %}
+                    <span class="risk-badge {% if item.risk == 'High' %}risk-high{% elif item.risk == 'Medium' %}risk-medium{% else %}risk-low{% endif %}">
+                        {{ item.disease }} ({{ item.risk }})
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Upload Section OR Results Section -->
         {% if not results %}
             <!-- Upload Form -->

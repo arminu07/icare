@@ -1,0 +1,2 @@
+age,blood_pressure,cholesterol,gender,glucose,bmi,smoking,physical_activity,disease,risk_level
+65,160/100,280,Male,180,32.5,Yes,Low,Cancer Risk,High

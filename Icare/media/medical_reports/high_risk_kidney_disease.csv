@@ -1,0 +1,2 @@
+age,gender,blood_pressure,cholesterol,glucose,bmi,smoking,alcohol,physical_activity,family_history,clinical_notes,medications,allergies
+60,Male,168/105,245,250,31.5,Yes,No,Low,Kidney Disease|Diabetes|Hypertension,"CKD Stage 4 (eGFR 22 mL/min/1.73m²). Creatinine 3.8 mg/dL, urea 68 mg/dL. Proteinuria 3.5g/day. Anaemia with Hb 8.9 g/dL. Bilateral small kidneys on ultrasound. Diabetic nephropathy confirmed on biopsy. Referred to nephrology for dialysis planning.",Erythropoietin 4000IU|Furosemide 80mg|Insulin Glargine 30 units|Calcium carbonate 500mg,Contrast dye

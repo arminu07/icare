@@ -12,7 +12,7 @@ from datetime import datetime
 from django.db import models as django_models
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
-from .email_alerts import send_high_risk_alert
+from .email_alerts import send_risk_alert
 from .disease_precautions import get_precautions_for_predictions
 
 logger = logging.getLogger(__name__)
@@ -271,33 +271,44 @@ def dashboard(request):
                 )
                 logger.info(f"[CSV_UPLOAD] ✓ Analysis result saved with ID: {analysis_result.id}")
                 
-                # ============ EMAIL ALERT FOR HIGH-RISK DISEASES ============
+                # ============ EMAIL ALERT FOR HIGH/MEDIUM-RISK DISEASES ============
                 email_alert_sent = False
                 alert_disease_count = 0
+                alert_retry_count = 0
+                alert_risk_type = ''
+                alert_diseases = []
+
                 try:
-                    # Get high-risk diseases
                     high_risk_diseases = analysis_result.get_high_risk_diseases()
-                    
-                    if high_risk_diseases:
-                        alert_disease_count = len(high_risk_diseases)
-                        logger.info(f"[CSV_UPLOAD] Attempting to send high-risk alert for {alert_disease_count} diseases...")
-                        
-                        # Send email alert (non-blocking)
-                        email_alert_sent = send_high_risk_alert(
+                    medium_risk_diseases = analysis_result.get_medium_risk_diseases()
+                    alert_diseases = high_risk_diseases + medium_risk_diseases
+
+                    if alert_diseases:
+                        alert_disease_count = len(alert_diseases)
+                        alert_risk_type = 'High & Medium' if high_risk_diseases and medium_risk_diseases else ('High' if high_risk_diseases else 'Medium')
+                        logger.info(f"[CSV_UPLOAD] Attempting to send health alert for {alert_disease_count} medium/high-risk diseases...")
+
+                        email_alert_sent, alert_retry_count = send_risk_alert(
                             request.user,
                             analysis_result,
-                            high_risk_diseases
+                            alert_diseases
                         )
                     else:
-                        logger.info(f"[CSV_UPLOAD] No high-risk diseases detected, skipping alert email")
-                        
+                        logger.info("[CSV_UPLOAD] No medium/high-risk diseases detected, skipping alert email")
+
                 except Exception as e:
-                    # Log the error but don't break the workflow
                     logger.error(
-                        f"[CSV_UPLOAD] Error sending high-risk alert email: {str(e)}",
+                        f"[CSV_UPLOAD] Error sending risk alert email: {str(e)}",
                         exc_info=True
                     )
                     email_alert_sent = False
+
+                # store alert info for audit
+                analysis_result.email_alert_sent = email_alert_sent
+                analysis_result.alert_disease_count = alert_disease_count
+                analysis_result.alert_retry_count = alert_retry_count
+                analysis_result.alert_risk_type = alert_risk_type
+                analysis_result.save(update_fields=['email_alert_sent', 'alert_disease_count', 'alert_retry_count', 'alert_risk_type'])
                 
                 # ============ ENRICH PREDICTIONS WITH PRECAUTIONS ============
                 enriched_predictions = get_precautions_for_predictions(formatted_predictions)
@@ -314,6 +325,14 @@ def dashboard(request):
                     'low_risk_count': prediction_results['low_risk_count'],
                     'avg_confidence': prediction_results['avg_confidence'],
                     'full_predictions': enriched_predictions,
+                    'alert_diseases': [
+                        {
+                            'disease': d['disease'],
+                            'confidence': d['confidence'],
+                            'risk': d['risk']
+                        } for d in alert_diseases
+                    ],
+                    'alert_risk_type': alert_risk_type,
                 }
                 
                 # Add email alert status to context
@@ -373,8 +392,21 @@ def analysis_detail(request, analysis_id):
                 'low_risk_count': analysis.low_risk_count,
                 'avg_confidence': analysis.average_confidence,
                 'full_predictions': enriched_predictions,
+                'alert_diseases': [
+                    {
+                        'disease': p['disease'],
+                        'confidence': p['confidence'],
+                        'risk': p['risk']
+                    }
+                    for p in all_predictions
+                    if p.get('risk') in ['High', 'Medium']
+                ],
+                'alert_risk_type': analysis.alert_risk_type,
             },
             'report': analysis.medical_report,
+            'email_alert_sent': analysis.email_alert_sent,
+            'alert_disease_count': analysis.alert_disease_count,
+            'alert_retry_count': analysis.alert_retry_count,
         })
 
         return render(request, 'analysis_detail.html', context)

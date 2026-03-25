@@ -11,97 +11,113 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 
-def send_high_risk_alert(user, analysis_result, high_risk_diseases):
+def _determine_risk_title(risk_diseases):
+    has_high = any(d.get('risk') == 'High' for d in risk_diseases)
+    has_medium = any(d.get('risk') == 'Medium' for d in risk_diseases)
+
+    if has_high and has_medium:
+        return 'HIGH & MEDIUM'
+    elif has_high:
+        return 'HIGH'
+    elif has_medium:
+        return 'MEDIUM'
+    return 'LOW'
+
+
+def send_risk_alert(user, analysis_result, risk_diseases, max_attempts=3):
     """
-    Send an email alert when high-risk diseases are detected.
-    
-    This function generates both plain text and HTML versions of the email
-    and sends them using Django's EmailMultiAlternatives. If email sending fails,
-    only an error is logged - the function does not raise exceptions.
-    
+    Send an email alert when high-risk and/or medium-risk diseases are detected.
+
     Args:
         user (User): Django User object for the recipient
         analysis_result (AnalysisResult): The AnalysisResult model instance
-        high_risk_diseases (list): List of high-risk disease dictionaries
-                                   Each dict should have: disease, confidence, risk
-    
+        risk_diseases (list): List of disease dictionaries with risk levels
+        max_attempts (int): Number of retry attempts for sending email
+
     Returns:
-        bool: True if email sent successfully, False otherwise
+        tuple: (success: bool, attempts: int)
     """
-    try:
-        if not high_risk_diseases:
-            logger.warning("[EMAIL_ALERT] No high-risk diseases provided for alert.")
-            return False
-        
-        recipient_email = user.email
-        sender_email = settings.DEFAULT_FROM_EMAIL
-        
-        logger.info(
-            f"[EMAIL_ALERT] Preparing high-risk alert email for {recipient_email} "
-            f"with {len(high_risk_diseases)} high-risk diseases"
-        )
-        
-        # Generate email subject
-        disease_list = ", ".join([d['disease'] for d in high_risk_diseases[:3]])
-        if len(high_risk_diseases) > 3:
-            disease_list += f", +{len(high_risk_diseases) - 3} more"
-        
-        subject = f"⚠️ HIGH-RISK HEALTH ALERT - Immediate Action Required: {disease_list}"
-        
-        # Generate plain text version
-        plain_text = _generate_plain_text_email(user, analysis_result, high_risk_diseases)
-        
-        # Generate HTML version
-        html_content = _generate_html_email(user, analysis_result, high_risk_diseases)
-        
-        # Create email with both plain text and HTML versions
-        email = EmailMultiAlternatives(
-            subject=subject,
-            body=plain_text,
-            from_email=sender_email,
-            to=[recipient_email]
-        )
-        
-        # Attach HTML alternative
-        email.attach_alternative(html_content, "text/html")
-        
-        # Send email
-        email.send(fail_silently=False)
-        
-        logger.info(
-            f"[EMAIL_ALERT] ✓ High-risk alert email sent successfully to {recipient_email} "
-            f"(Analysis ID: {analysis_result.id})"
-        )
-        
-        return True
-    
-    except Exception as e:
-        logger.error(
-            f"[EMAIL_ALERT] ✗ Failed to send high-risk alert email to {user.email}: {str(e)}",
-            exc_info=True
-        )
-        return False
+    if not risk_diseases:
+        logger.warning('[EMAIL_ALERT] No risk diseases provided for alert.')
+        return False, 0
+
+    valid = any(d.get('risk') in ['High', 'Medium'] for d in risk_diseases)
+    if not valid:
+        logger.warning('[EMAIL_ALERT] Provided diseases are not medium/high risk, skipping email.')
+        return False, 0
+
+    recipient_email = user.email
+    sender_email = settings.DEFAULT_FROM_EMAIL
+    risk_title = _determine_risk_title(risk_diseases)
+
+    disease_list = ', '.join([d['disease'] for d in risk_diseases[:3]])
+    if len(risk_diseases) > 3:
+        disease_list += f", +{len(risk_diseases) - 3} more"
+
+    subject = f"⚠️ {risk_title}-RISK HEALTH ALERT - Immediate Action Required: {disease_list}"
+    plain_text = _generate_plain_text_email(user, analysis_result, risk_diseases, risk_title)
+    html_content = _generate_html_email(user, analysis_result, risk_diseases, risk_title)
+
+    for attempt in range(1, max_attempts + 1):
+        try:
+            logger.info(
+                f"[EMAIL_ALERT] Attempt {attempt}/{max_attempts} for {risk_title}-risk alert to {recipient_email}"
+            )
+
+            email = EmailMultiAlternatives(
+                subject=subject,
+                body=plain_text,
+                from_email=sender_email,
+                to=[recipient_email]
+            )
+
+            email.attach_alternative(html_content, 'text/html')
+            email.send(fail_silently=False)
+
+            logger.info(
+                f"[EMAIL_ALERT] ✓ {risk_title}-risk alert email sent successfully to {recipient_email} "
+                f"(Analysis ID: {analysis_result.id}, attempt {attempt})"
+            )
+            return True, attempt
+
+        except Exception as e:
+            logger.error(
+                f"[EMAIL_ALERT] ✗ Attempt {attempt} failed to send {risk_title}-risk email to {recipient_email}: {str(e)}",
+                exc_info=True
+            )
+            if attempt == max_attempts:
+                logger.error(f"[EMAIL_ALERT] All {max_attempts} attempts failed.")
+                return False, attempt
+
+    return False, max_attempts
 
 
-def _generate_plain_text_email(user, analysis_result, high_risk_diseases):
+def send_high_risk_alert(user, analysis_result, high_risk_diseases):
+    """Backward-compatible wrapper for high-risk-only alerts."""
+    return send_risk_alert(user, analysis_result, high_risk_diseases)
+
+
+
+def _generate_plain_text_email(user, analysis_result, risk_diseases, risk_title='HIGH'):
     """
-    Generate plain text version of the high-risk alert email.
+    Generate plain text version of the risk alert email.
     
     Args:
         user (User): Django User object
         analysis_result (AnalysisResult): The AnalysisResult model instance
-        high_risk_diseases (list): List of high-risk disease dictionaries
-    
+        risk_diseases (list): List of disease dictionaries
+        risk_title (str): 'HIGH', 'MEDIUM' or 'HIGH & MEDIUM'
+
     Returns:
         str: Plain text email content
     """
     disease_details = "\n".join([
         f"  • {d['disease']}: {d['confidence']}% confidence, Risk: {d['risk']}"
-        for d in high_risk_diseases
+        for d in risk_diseases
     ])
     
     plain_text = f"""
-IMPORTANT: HIGH-RISK HEALTH CONDITIONS DETECTED
+IMPORTANT: {risk_title}-RISK HEALTH CONDITIONS DETECTED
 
 Dear {user.first_name or user.email},
 
@@ -139,21 +155,22 @@ ICARE Medical Prediction System
     return plain_text
 
 
-def _generate_html_email(user, analysis_result, high_risk_diseases):
+def _generate_html_email(user, analysis_result, risk_diseases, risk_title='HIGH'):
     """
-    Generate professional HTML version of the high-risk alert email.
+    Generate professional HTML version of the risk alert email.
     
     Args:
         user (User): Django User object
         analysis_result (AnalysisResult): The AnalysisResult model instance
-        high_risk_diseases (list): List of high-risk disease dictionaries
+        risk_diseases (list): List of disease dictionaries
+        risk_title (str): 'HIGH', 'MEDIUM' or 'HIGH & MEDIUM'
     
     Returns:
         str: HTML email content with styling
     """
     # Generate disease rows for the table
     disease_rows = ""
-    for disease in high_risk_diseases:
+    for disease in risk_diseases:
         confidence = disease.get('confidence', 0)
         disease_name = disease.get('disease', 'Unknown')
         risk_level = disease.get('risk', 'Unknown')
@@ -338,7 +355,7 @@ def _generate_html_email(user, analysis_result, high_risk_diseases):
             <!-- Header -->
             <div class="header">
                 <div class="header-icon">⚠️</div>
-                <h1>HIGH-RISK HEALTH ALERT</h1>
+                <h1>{risk_title}-RISK HEALTH ALERT</h1>
                 <p>Immediate Medical Attention Required</p>
             </div>
             
@@ -347,7 +364,7 @@ def _generate_html_email(user, analysis_result, high_risk_diseases):
                 <p class="greeting">Dear {user.first_name or user.email},</p>
                 
                 <div class="alert-box">
-                    <p>Your recent medical analysis has detected <strong>HIGH-RISK health conditions</strong> requiring immediate attention. Please consult with your healthcare provider as soon as possible.</p>
+                    <p>Your recent medical analysis has detected <strong>{risk_title}-RISK health conditions</strong> requiring immediate attention. Please consult with your healthcare provider as soon as possible.</p>
                 </div>
                 
                 <!-- Disease Table -->

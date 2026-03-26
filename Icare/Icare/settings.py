@@ -128,3 +128,7 @@ MEDIA_ROOT=os.path.join(BASE_DIR,'media/')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Login URL
 LOGIN_URL = 'login'
+
+# EmailJS Configuration
+# Get your public key from https://www.emailjs.com/docs/sdk/download/
+EMAILJS_PUBLIC_KEY = "wprnW6FeCgyij2v_e"

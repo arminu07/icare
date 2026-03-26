@@ -1,14 +1,22 @@
 """
 Email Alert System for High-Risk Disease Predictions
 Sends professional HTML and plain text emails when high-risk diseases are detected.
+Uses EmailJS for reliable email delivery.
 """
 
 import logging
-from django.core.mail import EmailMultiAlternatives
+import requests
+import json
 from django.conf import settings
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
+
+# EmailJS Configuration
+EMAILJS_SERVICE_ID = "service_1dt5q2f"
+EMAILJS_TEMPLATE_ID = "template_kxprlxq"
+EMAILJS_PUBLIC_KEY = 'wprnW6FeCgyij2v_e'
+EMAILJS_API_URL = "https://api.emailjs.com/api/v1.0/email/send"
 
 
 def _determine_risk_title(risk_diseases):
@@ -24,9 +32,26 @@ def _determine_risk_title(risk_diseases):
     return 'LOW'
 
 
+def _format_disease_details(risk_diseases):
+    """
+    Format disease details for EmailJS template.
+    
+    Args:
+        risk_diseases (list): List of disease dictionaries
+        
+    Returns:
+        str: Formatted disease details
+    """
+    disease_details = "\n".join([
+        f"• {d['disease']}: {d.get('confidence', 0)}% confidence, Risk: {d.get('risk', 'Unknown')}"
+        for d in risk_diseases
+    ])
+    return disease_details
+
+
 def send_risk_alert(user, analysis_result, risk_diseases, max_attempts=3):
     """
-    Send an email alert when high-risk and/or medium-risk diseases are detected.
+    Send an email alert via EmailJS when high-risk and/or medium-risk diseases are detected.
 
     Args:
         user (User): Django User object for the recipient
@@ -47,16 +72,47 @@ def send_risk_alert(user, analysis_result, risk_diseases, max_attempts=3):
         return False, 0
 
     recipient_email = user.email
-    sender_email = settings.DEFAULT_FROM_EMAIL
+    print(f"Preparing to send risk alert email to {recipient_email} for analysis ID {analysis_result.id}")
     risk_title = _determine_risk_title(risk_diseases)
-
+    
+    # Prepare disease list for email
     disease_list = ', '.join([d['disease'] for d in risk_diseases[:3]])
     if len(risk_diseases) > 3:
         disease_list += f", +{len(risk_diseases) - 3} more"
 
-    subject = f"⚠️ {risk_title}-RISK HEALTH ALERT - Immediate Action Required: {disease_list}"
-    plain_text = _generate_plain_text_email(user, analysis_result, risk_diseases, risk_title)
-    html_content = _generate_html_email(user, analysis_result, risk_diseases, risk_title)
+    # Get highest risk level
+    highest_risk = max([d.get('risk', 'Low') for d in risk_diseases], 
+                      key=lambda x: {'High': 3, 'Medium': 2, 'Low': 1}.get(x, 0))
+    
+    # Prepare action steps
+    action_steps = """1. Consult with your primary care physician immediately
+2. Schedule an appointment today - do not delay
+3. Bring this alert and analysis results to your doctor
+4. Follow-up testing may be required based on your condition
+5. Keep all symptoms documented for your medical team
+6. Seek emergency care if symptoms worsen"""
+
+    # Prepare EmailJS template variables
+    template_params = {
+        'service_id': EMAILJS_SERVICE_ID,
+        'template_id': EMAILJS_TEMPLATE_ID,
+        'user_id': EMAILJS_PUBLIC_KEY,
+        'template_params': {
+            'user_email': recipient_email,
+            'to_name': user.first_name or user.email,
+            'patient_name': user.first_name or user.username,
+            'patient_id': str(user.id),
+            'risk_level': risk_title,
+            'disease_name': disease_list,
+            'diseases_detected': _format_disease_details(risk_diseases),
+            'action_steps': action_steps,
+            'alert_time': analysis_result.created_at.strftime('%B %d, %Y at %I:%M %p'),
+            'analysis_id': str(analysis_result.id),
+            'total_diseases': str(analysis_result.total_diseases_analyzed),
+            'average_confidence': f"{analysis_result.average_confidence:.1f}%",
+            'subject': f"⚠️ {risk_title}-RISK HEALTH ALERT - Immediate Action Required: {disease_list}"
+        }
+    }
 
     for attempt in range(1, max_attempts + 1):
         try:
@@ -64,22 +120,36 @@ def send_risk_alert(user, analysis_result, risk_diseases, max_attempts=3):
                 f"[EMAIL_ALERT] Attempt {attempt}/{max_attempts} for {risk_title}-risk alert to {recipient_email}"
             )
 
-            email = EmailMultiAlternatives(
-                subject=subject,
-                body=plain_text,
-                from_email=sender_email,
-                to=[recipient_email]
+            # Send via EmailJS API
+            response = requests.post(
+                EMAILJS_API_URL,
+                json=template_params,
+                headers={'Content-Type': 'application/json'},
+                timeout=10
             )
+            
+            if response.status_code == 200:
+                logger.info(
+                    f"[EMAIL_ALERT] ✓ {risk_title}-risk alert email sent successfully via EmailJS to {recipient_email} "
+                    f"(Analysis ID: {analysis_result.id}, attempt {attempt})"
+                )
+                return True, attempt
+            else:
+                error_msg = response.text
+                logger.error(
+                    f"[EMAIL_ALERT] ✗ EmailJS returned status {response.status_code}: {error_msg}"
+                )
+                if attempt == max_attempts:
+                    logger.error(f"[EMAIL_ALERT] All {max_attempts} attempts failed.")
+                    return False, attempt
 
-            email.attach_alternative(html_content, 'text/html')
-            email.send(fail_silently=False)
-
-            logger.info(
-                f"[EMAIL_ALERT] ✓ {risk_title}-risk alert email sent successfully to {recipient_email} "
-                f"(Analysis ID: {analysis_result.id}, attempt {attempt})"
+        except requests.exceptions.Timeout:
+            logger.error(
+                f"[EMAIL_ALERT] ✗ Attempt {attempt} - Timeout connecting to EmailJS service"
             )
-            return True, attempt
-
+            if attempt == max_attempts:
+                return False, attempt
+                
         except Exception as e:
             logger.error(
                 f"[EMAIL_ALERT] ✗ Attempt {attempt} failed to send {risk_title}-risk email to {recipient_email}: {str(e)}",

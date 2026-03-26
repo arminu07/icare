@@ -1,0 +1,2 @@
+age,gender,blood_pressure,cholesterol,glucose,bmi,smoking,alcohol,physical_activity,family_history,clinical_notes,medications,allergies
+45,Female,148/94,280,102,28.7,No,No,Low,Thyroid Disorder|Autoimmune Disease,"TSH markedly elevated at 18.5 mIU/L, Free T4 suppressed at 0.4 ng/dL. Symptoms include severe fatigue, cold intolerance, constipation, weight gain of 12kg over 8 months, dry skin, and hair loss. Anti-TPO antibodies strongly positive. Hashimoto's thyroiditis confirmed.",Levothyroxine 100mcg,Iodine

@@ -1,0 +1,16 @@
+patient_id,disease,age,gender,blood_pressure,cholesterol,glucose,risk_level
+1,Heart Disease,68,Male,180,290,160,High
+2,Hypertension,62,Female,190,250,140,High
+3,Cancer Risk,70,Male,170,300,150,High
+4,COPD,66,Male,165,240,135,High
+5,Stroke Risk,72,Female,185,280,155,High
+6,Diabetes,60,Female,160,260,200,High
+7,Asthma,55,Male,150,230,130,High
+8,Kidney Disease,69,Male,175,270,145,High
+9,Liver Disease,64,Female,168,260,150,High
+10,Alzheimer's Disease,73,Female,155,240,140,High
+11,Parkinson's Disease,67,Male,158,250,135,High
+12,Obesity,59,Female,162,280,170,High
+13,Arthritis,65,Female,150,220,130,High
+14,Thyroid Disorder,58,Male,145,210,120,High
+15,Osteoporosis,71,Female,148,230,125,High

@@ -639,47 +639,182 @@ def get_disease_predictor():
 def predict_from_csv(csv_data):
     """
     Predict diseases from CSV data
+    Handles multiple patients: counts all disease instances while aggregating for display
     
     Args:
-        csv_data: List of dicts with medical information
+        csv_data: List of dicts with medical information (multiple rows = multiple patients)
         
     Returns:
-        Predictions with statistics
+        Predictions with statistics counting ALL instances across all patients
+    
+    Example:
+        - 15 patients each with Diabetes (High risk) = high_risk_count: 15
+        - 15 patients each with Hypertension (Medium risk) = medium_risk_count: 15
     """
     try:
         predictor = get_disease_predictor()
-        predictions = predictor.predict_diseases(csv_data)
         
-        # Calculate statistics
-        total_diseases = len(predictions[0]) if predictions else 0
-        high_risk_count = sum(
-            1 for p in predictions[0] 
-            if p.get('risk') == 'High'
-        ) if predictions else 0
-        medium_risk_count = sum(
-            1 for p in predictions[0] 
-            if p.get('risk') == 'Medium'
-        ) if predictions else 0
-        low_risk_count = sum(
-            1 for p in predictions[0] 
-            if p.get('risk') == 'Low'
-        ) if predictions else 0
+        # Log input data
+        num_input_patients = len(csv_data) if isinstance(csv_data, (list, tuple)) else 1
+        logger.info(f"[DISEASE_PREDICTION] Input csv_data contains {num_input_patients} row(s)")
         
-        avg_confidence = (
-            sum(p.get('confidence', 0) for p in predictions[0]) / len(predictions[0])
-            if predictions and predictions[0]
-            else 0
+        all_patient_predictions = predictor.predict_diseases(csv_data)
+        
+        logger.info(f"[DISEASE_PREDICTION] Received predictions for {len(all_patient_predictions)} patient(s)")
+        logger.info(f"[DISEASE_PREDICTION] Type of all_patient_predictions: {type(all_patient_predictions)}")
+        logger.info(f"[DISEASE_PREDICTION] First element type: {type(all_patient_predictions[0]) if all_patient_predictions else 'N/A'}")
+        
+        # DEBUG: Check if predictions are properly formatted
+        if all_patient_predictions and isinstance(all_patient_predictions[0], dict):
+            # This means we got a single flat list, not a list of lists!
+            logger.warning(f"[DISEASE_PREDICTION] ⚠️ WARNING: All predictions in ONE list (not per-patient)!")
+            logger.warning(f"[DISEASE_PREDICTION]   - Expected: List of {num_input_patients} patient prediction lists")
+            logger.warning(f"[DISEASE_PREDICTION]   - Got: Single flat list with {len(all_patient_predictions)} disease predictions")
+            logger.warning(f"[DISEASE_PREDICTION] This means predict_diseases() returned wrong format - attempting conversion...")
+            # Convert single list to list of lists format
+            all_patient_predictions = [all_patient_predictions]
+            logger.info(f"[DISEASE_PREDICTION] Converting to multi-patient format: NOW {len(all_patient_predictions)} patient list(s)")
+        
+        # VALIDATION: Check if output matches input
+        if len(all_patient_predictions) != num_input_patients:
+            logger.warning(f"[DISEASE_PREDICTION] ⚠️ MISMATCH: Input had {num_input_patients} patients, but got {len(all_patient_predictions)} prediction lists")
+            logger.warning(f"[DISEASE_PREDICTION]    This might indicate a format issue or bug in predict_diseases()")
+        
+        # IMPORTANT: Count ALL disease instances across ALL patients
+        # This means: if 15 patients each have High-risk Diabetes = 15 high-risk count
+        # (not 1 high-risk count after de-duplication)
+        
+        # Step 1: Count ALL instances by risk level (including duplicates across patients)
+        total_high_risk_instances = 0
+        total_medium_risk_instances = 0
+        total_low_risk_instances = 0
+        
+        logger.info(f"[DISEASE_PREDICTION] ============ STEP 1: COUNT ALL INSTANCES ============")
+        logger.info(f"[DISEASE_PREDICTION] Processing {len(all_patient_predictions)} patient(s)...")
+        
+        if len(all_patient_predictions) != num_input_patients:
+            logger.error(f"[DISEASE_PREDICTION] ❌ CRITICAL: Patient count mismatch after format check:")
+            logger.error(f"[DISEASE_PREDICTION]    - Input: {num_input_patients} patients")
+            logger.error(f"[DISEASE_PREDICTION]    - Processing: {len(all_patient_predictions)} patient lists")
+            logger.error(f"[DISEASE_PREDICTION]    - This will cause incorrect counting!")
+        
+        total_diseases_counted = 0
+        
+        for patient_idx, patient_predictions_raw in enumerate(all_patient_predictions):
+            # Ensure patient_predictions is always a list
+            if isinstance(patient_predictions_raw, list):
+                patient_predictions = patient_predictions_raw
+                logger.info(f"[DISEASE_PREDICTION]   Patient {patient_idx + 1}: {len(patient_predictions)} diseases predicted")
+            elif isinstance(patient_predictions_raw, dict):
+                patient_predictions = [patient_predictions_raw]
+                logger.warning(f"[DISEASE_PREDICTION]   ⚠️ Patient {patient_idx + 1}: Single prediction dict, wrapping in list")
+            else:
+                logger.error(f"[DISEASE_PREDICTION]   ❌ Patient {patient_idx + 1}: Invalid format - {type(patient_predictions_raw)}")
+                patient_predictions = []
+            
+            for pred in patient_predictions:
+                total_diseases_counted += 1
+                risk_level = pred.get('risk', 'Low')
+                if risk_level == 'High':
+                    total_high_risk_instances += 1
+                elif risk_level == 'Medium':
+                    total_medium_risk_instances += 1
+                else:
+                    total_low_risk_instances += 1
+        
+        logger.info(f"[DISEASE_PREDICTION] STEP 1 COMPLETE:")
+        logger.info(f"[DISEASE_PREDICTION]   - Total diseases processed: {total_diseases_counted}")
+        logger.info(f"[DISEASE_PREDICTION]   - High-risk: {total_high_risk_instances}")
+        logger.info(f"[DISEASE_PREDICTION]   - Medium-risk: {total_medium_risk_instances}")
+        logger.info(f"[DISEASE_PREDICTION]   - Low-risk: {total_low_risk_instances}")
+        
+        # Step 2: Create unique aggregated predictions for display
+        # (showing each disease once with highest risk/confidence)
+        aggregated_predictions = {}
+        
+        for patient_idx, patient_predictions_raw in enumerate(all_patient_predictions):
+            # Ensure patient_predictions is always a list
+            if isinstance(patient_predictions_raw, list):
+                patient_predictions = patient_predictions_raw
+            elif isinstance(patient_predictions_raw, dict):
+                patient_predictions = [patient_predictions_raw]
+            else:
+                patient_predictions = []
+            
+            for pred in patient_predictions:
+                disease_name = pred.get('disease', 'Unknown')
+                
+                if disease_name in aggregated_predictions:
+                    existing = aggregated_predictions[disease_name]
+                    # Risk hierarchy: High > Medium > Low
+                    risk_levels = {'High': 3, 'Medium': 2, 'Low': 1}
+                    existing_risk_score = risk_levels.get(existing.get('risk'), 0)
+                    new_risk_score = risk_levels.get(pred.get('risk'), 0)
+                    
+                    # Keep the one with higher risk, or higher confidence if same risk
+                    if new_risk_score > existing_risk_score or \
+                       (new_risk_score == existing_risk_score and pred.get('confidence', 0) > existing.get('confidence', 0)):
+                        aggregated_predictions[disease_name] = pred
+                        logger.debug(f"  Updated {disease_name}: {existing.get('risk')} → {pred.get('risk')}")
+                else:
+                    aggregated_predictions[disease_name] = pred
+                    logger.debug(f"  Added {disease_name}: {pred.get('risk')}")
+        
+        # Sort by confidence
+        final_predictions = sorted(
+            aggregated_predictions.values(),
+            key=lambda x: x.get('confidence', 0),
+            reverse=True
         )
         
-        return {
-            'predictions': predictions[0] if predictions else [],
-            'total_diseases': total_diseases,
-            'high_risk_count': high_risk_count,
-            'medium_risk_count': medium_risk_count,
-            'low_risk_count': low_risk_count,
-            'avg_confidence': round(avg_confidence, 2)
+        # Step 3: Calculate other statistics from the unique disease list
+        total_unique_diseases = len(final_predictions)
+        unique_high_risk = sum(1 for p in final_predictions if p.get('risk') == 'High')
+        unique_medium_risk = sum(1 for p in final_predictions if p.get('risk') == 'Medium')
+        unique_low_risk = sum(1 for p in final_predictions if p.get('risk') == 'Low')
+        
+        avg_confidence = (
+            sum(p.get('confidence', 0) for p in final_predictions) / len(final_predictions)
+            if final_predictions else 0
+        )
+        
+        logger.info(f"[DISEASE_PREDICTION] ✓ Analysis complete:")
+        logger.info(f"  - Total patients: {len(all_patient_predictions)}")
+        logger.info(f"  - Unique diseases: {total_unique_diseases}")
+        logger.info(f"  - ALL INSTANCES (for counting):")
+        logger.info(f"    - High risk instances: {total_high_risk_instances}")
+        logger.info(f"    - Medium risk instances: {total_medium_risk_instances}")
+        logger.info(f"    - Low risk instances: {total_low_risk_instances}")
+        logger.info(f"    - Total instances: {total_high_risk_instances + total_medium_risk_instances + total_low_risk_instances}")
+        logger.info(f"  - Unique (for display):")
+        logger.info(f"    - High risk: {unique_high_risk}")
+        logger.info(f"    - Medium risk: {unique_medium_risk}")
+        logger.info(f"    - Low risk: {unique_low_risk}")
+        logger.info(f"  - Average confidence: {avg_confidence:.2f}%")
+        
+        result = {
+            'predictions': final_predictions,
+            'total_diseases': total_unique_diseases,  # Unique diseases for display
+            'high_risk_count': total_high_risk_instances,  # COUNT ALL instances
+            'medium_risk_count': total_medium_risk_instances,  # COUNT ALL instances
+            'low_risk_count': total_low_risk_instances,  # COUNT ALL instances
+            'avg_confidence': round(avg_confidence, 2),
+            # Additional fields for reference
+            'total_patients': len(all_patient_predictions),
+            'unique_high_risk': unique_high_risk,
+            'unique_medium_risk': unique_medium_risk,
+            'unique_low_risk': unique_low_risk,
         }
         
+        # Validation: Ensure total instance counts are correct
+        total_instances = total_high_risk_instances + total_medium_risk_instances + total_low_risk_instances
+        expected_total = len(all_patient_predictions) * 15  # Assuming ~15 diseases per patient
+        logger.info(f"[DISEASE_PREDICTION] ✓ Validation:")
+        logger.info(f"  - Total predictions/instances: {total_instances}")
+        logger.info(f"  - Expected (patients × ~15 diseases): ~{expected_total}")
+        
+        return result
+        
     except Exception as e:
-        logger.error(f"Error in CSV prediction: {e}")
+        logger.error(f"Error in CSV prediction: {e}", exc_info=True)
         raise

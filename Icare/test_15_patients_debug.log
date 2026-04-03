@@ -1,0 +1,27 @@
+__main__ - INFO - Starting prediction for 15 patients...
+httpcore.connection - DEBUG - connect_tcp.started host='huggingface.co' port=443 local_address=None timeout=10 socket_options=None
+httpcore.connection - DEBUG - connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000001CEBB85A840>
+httpcore.connection - DEBUG - start_tls.started ssl_context=<ssl.SSLContext object at 0x000001CEBD0A93D0> server_hostname='huggingface.co' timeout=10
+httpcore.connection - DEBUG - start_tls.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000001CEBCB110A0>
+httpcore.http11 - DEBUG - send_request_headers.started request=<Request [b'HEAD']>
+httpcore.http11 - DEBUG - send_request_headers.complete
+httpcore.http11 - DEBUG - send_request_body.started request=<Request [b'HEAD']>
+httpcore.http11 - DEBUG - send_request_body.complete
+httpcore.http11 - DEBUG - receive_response_headers.started request=<Request [b'HEAD']>
+httpcore.http11 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 307, b'Temporary Redirect', [(b'Content-Type', b'text/plain; charset=utf-8'), (b'Content-Length', b'252'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 29 Mar 2026 07:15:45 GMT'), (b'Location', b'/api/resolve-cache/models/facebook/bart-large-mnli/d7645e127eaf1aefc7862fd59a17a5aa8558b8ce/config.json?%2Ffacebook%2Fbart-large-mnli%2Fresolve%2Fmain%2Fconfig.json=&etag=%22dfc96c728b40cc131e46b1c424c8e072d52b6d74%22'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-69c8d1a1-31f3a3404725c27a416c9e75;a5345e4a-ed66-4c1c-96d3-6cdbbbd3e3ab'), (b'RateLimit', b'"resolvers";r=2999;t=263'), (b'RateLimit-Policy', b'"fixed window";"resolvers";q=3000;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin, Accept'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Repo-Commit', b'd7645e127eaf1aefc7862fd59a17a5aa8558b8ce'), (b'Accept-Ranges', b'bytes'), (b'X-Hub-Cache', b'HIT'), (b'Content-Disposition', b'inline; filename*=UTF-8\'\'config.json; filename="config.json";'), (b'Content-Security-Policy', b"default-src 'none'; sandbox"), (b'X-Linked-ETag', b'"dfc96c728b40cc131e46b1c424c8e072d52b6d74"'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 d780200f7d1baa1402277be61e69ae1c.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'MAA51-P2'), (b'X-Amz-Cf-Id', b'UXKG6HH8DuLJzHhGdkCO3cIBHECGKG6lXMP5iq3u3BauZAYtn-HUWQ==')])
+httpx - INFO - HTTP Request: HEAD https://huggingface.co/facebook/bart-large-mnli/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+httpcore.http11 - DEBUG - receive_response_body.started request=<Request [b'HEAD']>
+httpcore.http11 - DEBUG - receive_response_body.complete
+httpcore.http11 - DEBUG - response_closed.started
+httpcore.http11 - DEBUG - response_closed.complete
+httpcore.http11 - DEBUG - send_request_headers.started request=<Request [b'HEAD']>
+httpcore.http11 - DEBUG - send_request_headers.complete
+httpcore.http11 - DEBUG - send_request_body.started request=<Request [b'HEAD']>
+httpcore.http11 - DEBUG - send_request_body.complete
+httpcore.http11 - DEBUG - receive_response_headers.started request=<Request [b'HEAD']>
+httpcore.http11 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'text/plain; charset=utf-8'), (b'Content-Length', b'1154'), (b'Connection', b'keep-alive'), (b'Date', b'Wed, 25 Jun 2025 12:44:06 GMT'), (b'ETag', b'"dfc96c728b40cc131e46b1c424c8e072d52b6d74"'), (b'X-Powered-By', b'huggingface-moon'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'X-Request-Id', b'Root=1-685bef16-2c276c0974c57fdd43155890;ba362354-09fa-4950-a492-905ca01671ac'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Repo-Commit', b'd7645e127eaf1aefc7862fd59a17a5aa8558b8ce'), (b'Accept-Ranges', b'bytes'), (b'X-Hub-Cache', b'HIT'), (b'Content-Disposition', b'inline; filename*=UTF-8\'\'config.json; filename="config.json";'), (b'Content-Security-Policy', b"default-src 'none'; sandbox"), (b'Vary', b'Origin'), (b'X-Cache', b'Hit from cloudfront'), (b'Via', b'1.1 d780200f7d1baa1402277be61e69ae1c.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'MAA51-P2'), (b'X-Amz-Cf-Id', b'Pu0GgzmUUCJluuIeaS4gBhNUHv-f1uMp4i3wIi8QRkoF2q4WgLf1TA=='), (b'Age', b'23913099')])
+httpx - INFO - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/facebook/bart-large-mnli/d7645e127eaf1aefc7862fd59a17a5aa8558b8ce/config.json "HTTP/1.1 200 OK"
+httpcore.http11 - DEBUG - receive_response_body.started request=<Request [b'HEAD']>
+httpcore.http11 - DEBUG - receive_response_body.complete
+httpcore.http11 - DEBUG - response_closed.started
+httpcore.http11 - DEBUG - response_closed.complete

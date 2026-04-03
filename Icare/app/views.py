@@ -271,6 +271,24 @@ def dashboard(request):
                 )
                 logger.info(f"[CSV_UPLOAD] ✓ Analysis result saved with ID: {analysis_result.id}")
                 
+                # ============ VALIDATION ============
+                # Verify the saved analysis has correct counts
+                logger.info(f"[CSV_UPLOAD] VALIDATION CHECK:")
+                logger.info(f"  - Total patients in CSV: {len(medical_data)}")
+                logger.info(f"  - Unique diseases analyzed: {analysis_result.total_diseases_analyzed}")
+                logger.info(f"  - HIGH-RISK disease instances (across all patients): {analysis_result.high_risk_count}")
+                logger.info(f"  - MEDIUM-RISK disease instances (across all patients): {analysis_result.medium_risk_count}")
+                logger.info(f"  - LOW-RISK disease instances (across all patients): {analysis_result.low_risk_count}")
+                logger.info(f"  - Total disease instances: {analysis_result.high_risk_count + analysis_result.medium_risk_count + analysis_result.low_risk_count}")
+                logger.info(f"  - Expected total instances (patients × ~15 diseases): ~{len(medical_data) * 15}")
+                
+                # Log high-risk diseases for debugging
+                high_risk_diseases = analysis_result.get_high_risk_diseases()
+                if high_risk_diseases:
+                    logger.info(f"  - Unique high-risk diseases found: {[d['disease'] for d in high_risk_diseases]} (count: {len(high_risk_diseases)})")
+                else:
+                    logger.info(f"  - No high-risk diseases detected")
+                
                 # ============ EMAIL ALERT FOR HIGH/MEDIUM-RISK DISEASES ============
                 email_alert_sent = False
                 alert_disease_count = 0
